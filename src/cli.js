@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name('crunes')
   .description('CLI tool for querying context-runes enrichers')
-  .version('1.0.0')
+  .version('1.0.4')
   .option('-n, --no-interactive', 'disable interactive prompts (also auto-detected in non-TTY environments)');
 
 program
