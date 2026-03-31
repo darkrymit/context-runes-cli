@@ -16,7 +16,7 @@ function template(key, format) {
       `  const root = utils.tree.node('${key}', 'Root description', [\n` +
       `    utils.tree.node('child', 'Child description'),\n` +
       `  ]);\n` +
-      `  return { type: 'tree', root };\n` +
+      `  return utils.section('example-tree', { type: 'tree', root });\n` +
       `}\n`
     );
   }
@@ -28,7 +28,7 @@ function template(key, format) {
     `    utils.md.h3('${key}'),\n` +
     `    utils.md.ul(['Replace with real data']),\n` +
     `  ].join('\\n');\n` +
-    `  return { type: 'markdown', content };\n` +
+    `  return utils.section('example-md', { type: 'markdown', content });\n` +
     `}\n`
   );
 }

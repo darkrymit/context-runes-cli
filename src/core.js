@@ -21,7 +21,6 @@ export async function runEnricher(dir, config, key, args) {
   const enricher = await import(pathToFileURL(fullPath).href);
 
   const generate = enricher.generate ?? enricher.default?.generate;
-  const legacyTag = enricher.sectionTag ?? enricher.default?.sectionTag ?? key;
 
   if (typeof generate !== 'function') {
     throw new Error(`Enricher "${key}" does not export a generate function`);
@@ -34,5 +33,5 @@ export async function runEnricher(dir, config, key, args) {
   if (Array.isArray(result)) return result;
 
   // Shape A — single data object, normalise to single-element array
-  return [{ name: legacyTag, title: undefined, attrs: {}, data: result }];
+  return [result]
 }

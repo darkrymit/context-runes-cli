@@ -114,7 +114,7 @@ utils.section(name, data, { title?, attrs? }?)
 Each section renders as:
 
 ```
-## {title}               ← omitted if no title
+## {title or name}
 [k: v] [k: v]            ← omitted if no attrs
 {rendered data}
 ```

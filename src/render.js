@@ -12,7 +12,7 @@ export function render(data) {
 /**
  * Renders a Section object to CLI md output:
  *
- *   ## {title}            ← omitted if no title
+ *   ## {title or name}
  *   [{k}: {v}] ...        ← omitted if attrs empty
  *   {rendered data}
  */
@@ -21,6 +21,10 @@ export function renderSection(section) {
 
   if (section.title) {
     parts.push(`## ${section.title}`);
+  } else if (section.name) {
+    parts.push(`## ${section.name}`);
+  } else {
+    parts.push('## (no title)');
   }
 
   if (section.attrs && Object.keys(section.attrs).length > 0) {
