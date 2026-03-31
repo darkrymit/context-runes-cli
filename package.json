@@ -1,0 +1,23 @@
+{
+  "name": "@darkrymit/context-runes",
+  "version": "1.0.0",
+  "description": "CLI tool for querying context-runes enrichers",
+  "type": "module",
+  "bin": {
+    "crunes": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.10.0",
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0"
+  },
+  "license": "MIT",
+  "author": "DarkRymit",
+  "engines": {
+    "node": ">=20"
+  }
+}
