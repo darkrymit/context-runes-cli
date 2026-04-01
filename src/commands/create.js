@@ -39,10 +39,10 @@ export async function handler({
   path: enricherRelPath,
   name,
   description,
-  nonInteractive = false,
+  yes = false,
   projectRoot = process.cwd(),
 } = {}) {
-  const isNonInteractive = nonInteractive || !process.stdout.isTTY;
+  const isNonInteractive = yes || !process.stdout.isTTY;
 
   if (isNonInteractive) {
     if (!key) {

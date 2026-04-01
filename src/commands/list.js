@@ -4,6 +4,7 @@ import { output } from '../output.js';
 
 export async function handler({
   format = 'md',
+  plain = false,
   projectRoot = process.cwd(),
 } = {}) {
   let config;
@@ -30,6 +31,13 @@ export async function handler({
 
   if (format === 'json') {
     process.stdout.write(JSON.stringify(entries, null, 2) + '\n');
+    return;
+  }
+
+  if (plain) {
+    for (const { key, name, description, path } of entries) {
+      process.stdout.write(`${key}\t${name ?? ''}\t${description ?? ''}\t${path}\n`);
+    }
     return;
   }
 

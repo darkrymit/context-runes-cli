@@ -1,20 +1,38 @@
 import chalk from 'chalk';
 
+let _plain = false;
+
+export function configure({ plain = false } = {}) {
+  _plain = plain;
+  if (plain) chalk.level = 0;
+}
+
+const sym = {
+  ok:   () => _plain ? '[ok]'   : chalk.green('✓'),
+  err:  () => _plain ? '[err]'  : chalk.red('✗'),
+  warn: () => _plain ? '[warn]' : chalk.yellow('⚠'),
+  info: () => _plain ? '[info]' : chalk.blue('ℹ'),
+};
+
 export const output = {
   header(label) {
-    console.log(chalk.dim('─'.repeat(40)));
-    console.log(chalk.bold(label));
+    if (_plain) {
+      console.log(`=== ${label} ===`);
+    } else {
+      console.log(chalk.dim('─'.repeat(40)));
+      console.log(chalk.bold(label));
+    }
   },
   success(msg) {
-    console.log(`${chalk.green('✓')} ${msg}`);
+    console.log(`${sym.ok()} ${msg}`);
   },
   error(msg) {
-    console.error(`${chalk.red('✗')} ${msg}`);
+    console.error(`${sym.err()} ${msg}`);
   },
   warn(msg) {
-    console.warn(`${chalk.yellow('⚠')} ${msg}`);
+    console.warn(`${sym.warn()} ${msg}`);
   },
   info(msg) {
-    console.log(`${chalk.blue('ℹ')} ${msg}`);
+    console.log(`${sym.info()} ${msg}`);
   },
 };

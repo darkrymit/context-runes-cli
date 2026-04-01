@@ -7,12 +7,11 @@ const EMPTY_CONFIG = JSON.stringify({ enrichers: {} }, null, 2) + '\n';
 
 export async function handler({
   yes = false,
-  nonInteractive = false,
   projectRoot = process.cwd(),
 } = {}) {
   const configDir = join(projectRoot, '.context-runes');
   const configPath = join(configDir, 'config.json');
-  const isNonInteractive = nonInteractive || !process.stdout.isTTY;
+  const isNonInteractive = yes || !process.stdout.isTTY;
 
   if (existsSync(configPath)) {
     if (!yes) {

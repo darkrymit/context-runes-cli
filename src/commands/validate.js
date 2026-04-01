@@ -1,12 +1,11 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import chalk from 'chalk';
-import { loadConfig } from '../core.js';
+import { loadConfig, getEnricherEntry } from '../core.js';
 import { output } from '../output.js';
 
 export async function handler({
-  nonInteractive = false,
+  yes = false,
   projectRoot = process.cwd(),
 } = {}) {
   let config;
@@ -28,11 +27,11 @@ export async function handler({
   let allPassed = true;
 
   for (const key of keys) {
-    const relPath = enrichers[key];
-    const fullPath = join(projectRoot, relPath);
+    const entry = getEnricherEntry(config, key);
+    const fullPath = join(projectRoot, entry.path);
 
     if (!existsSync(fullPath)) {
-      console.log(`${chalk.red('✗')} ${chalk.bold(key)} — file not found: ${relPath}`);
+      output.error(`${key} — file not found: ${entry.path}`);
       allPassed = false;
       continue;
     }
@@ -41,23 +40,19 @@ export async function handler({
     try {
       enricher = await import(pathToFileURL(fullPath).href);
     } catch (err) {
-      console.log(`${chalk.red('✗')} ${chalk.bold(key)} — import error: ${err.message}`);
+      output.error(`${key} — import error: ${err.message}`);
       allPassed = false;
       continue;
     }
 
     const generate = enricher.generate ?? enricher.default?.generate;
     if (typeof generate !== 'function') {
-      console.log(`${chalk.red('✗')} ${chalk.bold(key)} — missing export: generate()`);
+      output.error(`${key} — missing export: generate()`);
       allPassed = false;
       continue;
     }
 
-    const sectionTag = enricher.sectionTag ?? enricher.default?.sectionTag;
-    const tagNote = sectionTag
-      ? chalk.dim(` (tag: ${sectionTag})`)
-      : chalk.dim(' (no sectionTag, defaults to key)');
-    console.log(`${chalk.green('✓')} ${chalk.bold(key)}${tagNote}`);
+    output.success(key);
   }
 
   if (!allPassed) {
