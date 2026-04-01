@@ -12,8 +12,8 @@ const program = new Command();
 
 program
   .name('crunes')
-  .description('CLI tool for querying context-runes enrichers')
-  .version('1.0.5')
+  .description('CLI tool for managing context runes')
+  .version('1.0.6')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use');
 
@@ -23,7 +23,7 @@ program.hook('preAction', () => {
 
 program
   .command('query <key> [args...]')
-  .description('Query an enricher and print its output')
+  .description('Query a rune and print its output')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (key, args, opts) => {
     await queryHandler({ key, args, format: opts.format, projectRoot: process.cwd() });
@@ -31,14 +31,14 @@ program
 
 program
   .command('run <key> [args...]')
-  .description('Query an enricher — alias for query --format md')
+  .description('Query a rune — alias for query --format md')
   .action(async (key, args) => {
     await runHandler({ key, args, projectRoot: process.cwd() });
   });
 
 program
   .command('list')
-  .description('List all registered enricher keys')
+  .description('List all registered runes')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (opts) => {
     await listHandler({ format: opts.format, plain: !!program.opts().plain, projectRoot: process.cwd() });
@@ -46,7 +46,7 @@ program
 
 program
   .command('validate')
-  .description('Check that all registered enrichers exist and export generate()')
+  .description('Check that all registered runes exist and export generate()')
   .action(async () => {
     await validateHandler({ yes: !!program.opts().yes, projectRoot: process.cwd() });
   });
@@ -60,11 +60,11 @@ program
 
 program
   .command('create [key]')
-  .description('Scaffold a new enricher and register it in config')
-  .option('--format <format>', 'enricher output format: tree or markdown')
-  .option('--path <path>', 'file path for the enricher (default: .context-runes/enrichers/<key>.js)')
+  .description('Scaffold a new rune and register it in config')
+  .option('--format <format>', 'rune output format: tree or markdown')
+  .option('--path <path>', 'file path for the rune (default: .context-runes/runes/<key>.js)')
   .option('--name <name>', 'human-readable label shown in crunes list')
-  .option('--description <description>', 'short description of what context this enricher provides')
+  .option('--description <description>', 'short description of what context this rune provides')
   .action(async (key, opts) => {
     await createHandler({ key, format: opts.format, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: process.cwd() });
   });

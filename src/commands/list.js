@@ -1,5 +1,5 @@
 import Table from 'cli-table3';
-import { loadConfig, getEnricherEntry } from '../core.js';
+import { loadConfig, getRune } from '../core.js';
 import { output } from '../output.js';
 
 export async function handler({
@@ -16,16 +16,16 @@ export async function handler({
     process.exit(1);
   }
 
-  const enrichers = config.enrichers ?? {};
-  const keys = Object.keys(enrichers);
+  const runes = config.runes ?? {};
+  const keys = Object.keys(runes);
 
   if (keys.length === 0) {
-    process.stdout.write('No enrichers configured. Run `crunes create <key>` to add one.\n');
+    process.stdout.write('No runes configured. Run `crunes create <key>` to add one.\n');
     return;
   }
 
   const entries = keys.map(key => {
-    const entry = getEnricherEntry(config, key);
+    const entry = getRune(config, key);
     return { key, path: entry.path, name: entry.name ?? null, description: entry.description ?? null };
   });
 

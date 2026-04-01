@@ -36,7 +36,7 @@ function template(key, format) {
 export async function handler({
   key,
   format,
-  path: enricherRelPath,
+  path: runeRelPath,
   name,
   description,
   yes = false,
@@ -57,7 +57,7 @@ export async function handler({
     intro('context-runes create');
 
     if (!key) {
-      const result = await text({ message: 'Enricher key?', validate: v => v ? undefined : 'Required' });
+      const result = await text({ message: 'Rune key?', validate: v => v ? undefined : 'Required' });
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
       key = result;
     }
@@ -74,11 +74,11 @@ export async function handler({
       format = result;
     }
 
-    if (!enricherRelPath) {
-      const defaultPath = `.context-runes/enrichers/${key}.js`;
+    if (!runeRelPath) {
+      const defaultPath = `.context-runes/runes/${key}.js`;
       const result = await text({ message: 'File path?', initialValue: defaultPath });
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
-      enricherRelPath = result;
+      runeRelPath = result;
     }
 
     if (!name) {
@@ -88,34 +88,34 @@ export async function handler({
     }
 
     if (!description) {
-      const result = await text({ message: 'Description? (optional)', placeholder: 'What context does this enricher provide?' });
+      const result = await text({ message: 'Description? (optional)', placeholder: 'What context does this rune provide?' });
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
       description = result || undefined;
     }
   }
 
-  enricherRelPath = enricherRelPath ?? `.context-runes/enrichers/${key}.js`;
-  const enricherAbsPath = join(projectRoot, enricherRelPath);
+  runeRelPath = runeRelPath ?? `.context-runes/runes/${key}.js`;
+  const runeAbsPath = join(projectRoot, runeRelPath);
 
-  mkdirSync(dirname(enricherAbsPath), { recursive: true });
-  writeFileSync(enricherAbsPath, template(key, format));
+  mkdirSync(dirname(runeAbsPath), { recursive: true });
+  writeFileSync(runeAbsPath, template(key, format));
 
   // Register in config — write object format to support name/description
   const configPath = join(projectRoot, '.context-runes', 'config.json');
-  let config = { enrichers: {} };
+  let config = { runes: {} };
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf8')); } catch {}
   }
   const entry = name || description
-    ? { path: enricherRelPath, ...(name && { name }), ...(description && { description }) }
-    : enricherRelPath;
-  config.enrichers = { ...(config.enrichers ?? {}), [key]: entry };
+    ? { path: runeRelPath, ...(name && { name }), ...(description && { description }) }
+    : runeRelPath;
+  config.runes = { ...(config.runes ?? {}), [key]: entry };
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 
   if (!isNonInteractive) {
-    outro(`Created ${enricherRelPath}\nRun: crunes query ${key}`);
+    outro(`Created ${runeRelPath}\nRun: crunes query ${key}`);
   } else {
-    output.success(`Created ${enricherRelPath}`);
+    output.success(`Created ${runeRelPath}`);
     output.info(`Run: crunes query ${key}`);
   }
 }

@@ -1,4 +1,4 @@
-import { loadConfig, runEnricher } from '../core.js';
+import { loadConfig, runRune } from '../core.js';
 import { renderSection } from '../render.js';
 import { output } from '../output.js';
 
@@ -19,14 +19,14 @@ export async function handler({
 
   let sections;
   try {
-    sections = await runEnricher(projectRoot, config, key, args);
+    sections = await runRune(projectRoot, config, key, args);
   } catch (err) {
-    output.error(`Enricher "${key}" failed: ${err.message}`);
+    output.error(`Rune "${key}" failed: ${err.message}`);
     process.exit(1);
   }
 
   if (!sections) {
-    const available = Object.keys(config.enrichers ?? {}).join(', ') || '(none)';
+    const available = Object.keys(config.runes ?? {}).join(', ') || '(none)';
     output.error(`Unknown key: "${key}". Available: ${available}`);
     process.exit(1);
   }

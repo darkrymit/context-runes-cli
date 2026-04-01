@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { loadConfig, getEnricherEntry } from '../core.js';
+import { loadConfig, getRune } from '../core.js';
 import { output } from '../output.js';
 
 export async function handler({
@@ -16,18 +16,18 @@ export async function handler({
     process.exit(1);
   }
 
-  const enrichers = config.enrichers ?? {};
-  const keys = Object.keys(enrichers);
+  const runes = config.runes ?? {};
+  const keys = Object.keys(runes);
 
   if (keys.length === 0) {
-    output.info('No enrichers registered. Add some with `crunes create <key>`.');
+    output.info('No runes registered. Add some with `crunes create <key>`.');
     return;
   }
 
   let allPassed = true;
 
   for (const key of keys) {
-    const entry = getEnricherEntry(config, key);
+    const entry = getRune(config, key);
     const fullPath = join(projectRoot, entry.path);
 
     if (!existsSync(fullPath)) {
@@ -36,16 +36,16 @@ export async function handler({
       continue;
     }
 
-    let enricher;
+    let rune;
     try {
-      enricher = await import(pathToFileURL(fullPath).href);
+      rune = await import(pathToFileURL(fullPath).href);
     } catch (err) {
       output.error(`${key} — import error: ${err.message}`);
       allPassed = false;
       continue;
     }
 
-    const generate = enricher.generate ?? enricher.default?.generate;
+    const generate = rune.generate ?? rune.default?.generate;
     if (typeof generate !== 'function') {
       output.error(`${key} — missing export: generate()`);
       allPassed = false;

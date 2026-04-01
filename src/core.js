@@ -9,10 +9,10 @@ export function loadConfig(dir) {
 }
 
 /**
- * Normalises an enricher config entry to { path, name?, description? }.
+ * Normalises a rune config entry to { path, name?, description? }.
  * Supports both legacy string format and object format.
  */
-export function normaliseEnricherEntry(entry) {
+export function normaliseRune(entry) {
   if (typeof entry === 'string') return { path: entry };
   return entry;
 }
@@ -20,28 +20,28 @@ export function normaliseEnricherEntry(entry) {
 /**
  * Returns the normalised entry for a key, or null if not found.
  */
-export function getEnricherEntry(config, key) {
-  const raw = (config.enrichers ?? {})[key];
+export function getRune(config, key) {
+  const raw = (config.runes ?? {})[key];
   if (raw == null) return null;
-  return normaliseEnricherEntry(raw);
+  return normaliseRune(raw);
 }
 
 /**
- * Runs an enricher and returns a Section[] array.
+ * Runs a rune and returns a Section[] array.
  * Handles Shape A (single data object) and Shape B (Section[]) returns.
  * Returns null if key not in config.
  */
-export async function runEnricher(dir, config, key, args) {
-  const entry = getEnricherEntry(config, key);
+export async function runRune(dir, config, key, args) {
+  const entry = getRune(config, key);
   if (!entry) return null;
 
   const fullPath = join(dir, entry.path);
-  const enricher = await import(pathToFileURL(fullPath).href);
+  const rune = await import(pathToFileURL(fullPath).href);
 
-  const generate = enricher.generate ?? enricher.default?.generate;
+  const generate = rune.generate ?? rune.default?.generate;
 
   if (typeof generate !== 'function') {
-    throw new Error(`Enricher "${key}" does not export a generate function`);
+    throw new Error(`Rune "${key}" does not export a generate function`);
   }
 
   const utils = createUtils();

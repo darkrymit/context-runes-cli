@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { intro, outro, confirm, cancel } from '@clack/prompts';
 import { output } from '../output.js';
 
-const EMPTY_CONFIG = JSON.stringify({ enrichers: {} }, null, 2) + '\n';
+const EMPTY_CONFIG = JSON.stringify({ runes: {} }, null, 2) + '\n';
 
 export async function handler({
   yes = false,
