@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name('crunes')
   .description('CLI tool for querying context-runes enrichers')
-  .version('1.0.4')
+  .version('1.0.5')
   .option('-n, --no-interactive', 'disable interactive prompts (also auto-detected in non-TTY environments)');
 
 program
@@ -58,8 +58,10 @@ program
   .description('Scaffold a new enricher and register it in config')
   .option('--format <format>', 'enricher output format: tree or markdown')
   .option('--path <path>', 'file path for the enricher (default: .context-runes/enrichers/<key>.js)')
+  .option('--name <name>', 'human-readable label shown in crunes list')
+  .option('--description <description>', 'short description of what context this enricher provides')
   .action(async (key, opts) => {
-    await createHandler({ key, format: opts.format, path: opts.path, nonInteractive: !program.opts().interactive, projectRoot: process.cwd() });
+    await createHandler({ key, format: opts.format, path: opts.path, name: opts.name, description: opts.description, nonInteractive: !program.opts().interactive, projectRoot: process.cwd() });
   });
 
 program.parse();

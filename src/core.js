@@ -9,15 +9,33 @@ export function loadConfig(dir) {
 }
 
 /**
+ * Normalises an enricher config entry to { path, name?, description? }.
+ * Supports both legacy string format and object format.
+ */
+export function normaliseEnricherEntry(entry) {
+  if (typeof entry === 'string') return { path: entry };
+  return entry;
+}
+
+/**
+ * Returns the normalised entry for a key, or null if not found.
+ */
+export function getEnricherEntry(config, key) {
+  const raw = (config.enrichers ?? {})[key];
+  if (raw == null) return null;
+  return normaliseEnricherEntry(raw);
+}
+
+/**
  * Runs an enricher and returns a Section[] array.
  * Handles Shape A (single data object) and Shape B (Section[]) returns.
  * Returns null if key not in config.
  */
 export async function runEnricher(dir, config, key, args) {
-  const enricherPath = (config.enrichers ?? {})[key];
-  if (!enricherPath) return null;
+  const entry = getEnricherEntry(config, key);
+  if (!entry) return null;
 
-  const fullPath = join(dir, enricherPath);
+  const fullPath = join(dir, entry.path);
   const enricher = await import(pathToFileURL(fullPath).href);
 
   const generate = enricher.generate ?? enricher.default?.generate;
@@ -33,5 +51,5 @@ export async function runEnricher(dir, config, key, args) {
   if (Array.isArray(result)) return result;
 
   // Shape A — single data object, normalise to single-element array
-  return [result]
+  return [result];
 }

@@ -1,5 +1,5 @@
 import Table from 'cli-table3';
-import { loadConfig } from '../core.js';
+import { loadConfig, getEnricherEntry } from '../core.js';
 import { output } from '../output.js';
 
 export async function handler({
@@ -18,23 +18,28 @@ export async function handler({
   const enrichers = config.enrichers ?? {};
   const keys = Object.keys(enrichers);
 
-  if (format === 'json') {
-    process.stdout.write(JSON.stringify(keys, null, 2) + '\n');
-    return;
-  }
-
   if (keys.length === 0) {
     process.stdout.write('No enrichers configured. Run `crunes create <key>` to add one.\n');
     return;
   }
 
+  const entries = keys.map(key => {
+    const entry = getEnricherEntry(config, key);
+    return { key, path: entry.path, name: entry.name ?? null, description: entry.description ?? null };
+  });
+
+  if (format === 'json') {
+    process.stdout.write(JSON.stringify(entries, null, 2) + '\n');
+    return;
+  }
+
   const table = new Table({
-    head: ['Key', 'Path'],
+    head: ['Key', 'Name', 'Description', 'Path'],
     style: { head: ['cyan'] },
   });
 
-  for (const key of keys) {
-    table.push([key, enrichers[key]]);
+  for (const { key, name, description, path } of entries) {
+    table.push([key, name ?? '', description ?? '', path]);
   }
 
   process.stdout.write(table.toString() + '\n');

@@ -37,6 +37,8 @@ export async function handler({
   key,
   format,
   path: enricherRelPath,
+  name,
+  description,
   nonInteractive = false,
   projectRoot = process.cwd(),
 } = {}) {
@@ -78,6 +80,18 @@ export async function handler({
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
       enricherRelPath = result;
     }
+
+    if (!name) {
+      const result = await text({ message: 'Name? (optional)', placeholder: 'Human-readable label for crunes list' });
+      if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
+      name = result || undefined;
+    }
+
+    if (!description) {
+      const result = await text({ message: 'Description? (optional)', placeholder: 'What context does this enricher provide?' });
+      if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
+      description = result || undefined;
+    }
   }
 
   enricherRelPath = enricherRelPath ?? `.context-runes/enrichers/${key}.js`;
@@ -86,13 +100,16 @@ export async function handler({
   mkdirSync(dirname(enricherAbsPath), { recursive: true });
   writeFileSync(enricherAbsPath, template(key, format));
 
-  // Register in config
+  // Register in config — write object format to support name/description
   const configPath = join(projectRoot, '.context-runes', 'config.json');
   let config = { enrichers: {} };
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf8')); } catch {}
   }
-  config.enrichers = { ...(config.enrichers ?? {}), [key]: enricherRelPath };
+  const entry = name || description
+    ? { path: enricherRelPath, ...(name && { name }), ...(description && { description }) }
+    : enricherRelPath;
+  config.enrichers = { ...(config.enrichers ?? {}), [key]: entry };
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 
   if (!isNonInteractive) {
