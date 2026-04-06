@@ -2,10 +2,8 @@
 import path from 'node:path'
 import { Command } from 'commander'
 import { configure as configureOutput } from './output.js'
-import { handler as queryHandler } from './commands/query.js'
-import { handler as runHandler } from './commands/run.js'
+import { handler as useHandler } from './commands/use.js'
 import { handler as listHandler } from './commands/list.js'
-import { handler as validateHandler } from './commands/validate.js'
 import { handler as initHandler } from './commands/init.js'
 import { handler as createHandler } from './commands/create.js'
 import { handler as pluginInstallHandler } from './commands/plugin/install.js'
@@ -20,14 +18,18 @@ import { handler as marketplaceListHandler } from './commands/marketplace/list.j
 import { handler as marketplaceSearchHandler } from './commands/marketplace/search.js'
 import { handler as marketplaceUpdateHandler } from './commands/marketplace/update.js'
 import { handler as marketplaceBrowseHandler } from './commands/marketplace/browse.js'
-import { handleCreateFrom } from './commands/plugin/create-from.js'
+import { handler as benchmarkHandler } from './commands/benchmark.js'
+import { handler as versionHandler } from './commands/version.js'
+import { handler as templateListHandler } from './commands/template/list.js'
+import { handler as templateUseHandler } from './commands/template/use.js'
+import { handler as templateCreateHandler } from './commands/template/create.js'
 
 const program = new Command()
 
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.2.1')
+  .version('1.3.0')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')
@@ -42,18 +44,40 @@ function projectRoot() {
 }
 
 program
-  .command('query <key> [args...]')
-  .description('Query a rune and print its output')
+  .command('use <key>')
+  .description(
+    'Use one or more runes and output the result.\n' +
+    '  Key format: [source:]name[=arg1,arg2][::section1,section2]\n' +
+    '  local:name  — resolve from project config only\n' +
+    '  plugin:name — resolve directly from an enabled plugin\n' +
+    '  name        — auto-resolve: project config first, then enabled plugins'
+  )
   .option('--format <format>', 'output format: md (default) or json', 'md')
-  .action(async (key, args, opts) => {
-    await queryHandler({ key, args, format: opts.format, projectRoot: projectRoot() })
+  .option('-a, --and <key>', 'add another rune key to the batch (repeatable)', (val, acc) => [...acc, val], [])
+  .option('--fail-fast', 'stop on first rune error (default: run all, exit 1 if any failed)')
+  .action(async (key, opts) => {
+    const keys = [key, ...opts.and]
+    await useHandler({ keys, format: opts.format, failFast: !!opts.failFast, projectRoot: projectRoot() })
   })
 
 program
-  .command('run <key> [args...]')
-  .description('Query a rune — alias for query --format md')
-  .action(async (key, args) => {
-    await runHandler({ key, args, projectRoot: projectRoot() })
+  .command('version')
+  .description('Print the installed version and check for updates')
+  .option('--no-check', 'skip the npm update check')
+  .action(async (opts) => {
+    await versionHandler({ check: opts.check, plain: !!program.opts().plain })
+  })
+
+program
+  .command('bench [key]')
+  .description(
+    'Time rune execution and report which runes are fast, ok, or slow.\n' +
+    '  Benchmarks all registered runes when no key is given.\n' +
+    '  Key supports local:name, plugin:name, or bare name (same as crunes use).'
+  )
+  .option('--runs <n>', 'number of runs to average (default: 1)', v => parseInt(v, 10), 1)
+  .action(async (key, opts) => {
+    await benchmarkHandler({ key, runs: opts.runs, plain: !!program.opts().plain, projectRoot: projectRoot() })
   })
 
 program
@@ -62,13 +86,6 @@ program
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (opts) => {
     await listHandler({ format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
-  })
-
-program
-  .command('validate')
-  .description('Check that all registered runes exist and export generate()')
-  .action(async () => {
-    await validateHandler({ yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 program
@@ -81,24 +98,11 @@ program
 program
   .command('create [key]')
   .description('Scaffold a new rune and register it in config')
-  .option('--from <marketplace@plugin>', 'copy a rune template from an installed plugin')
   .option('--format <format>', 'rune output format: tree or markdown')
   .option('--path <path>', 'file path for the rune (default: .context-runes/runes/<key>.js)')
   .option('--name <name>', 'human-readable label shown in crunes list')
   .option('--description <description>', 'short description of what context this rune provides')
   .action(async (key, opts) => {
-    if (opts.from) {
-      try {
-        const result = await handleCreateFrom({ from: opts.from, key, runeRelPath: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
-        if (program.opts().yes || !process.stdout.isTTY) {
-          console.log(`Created ${result.runeRelPath}`)
-        }
-      } catch (err) {
-        console.error(`Error: ${err.message}`)
-        process.exit(1)
-      }
-      return
-    }
     await createHandler({ key, format: opts.format, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
@@ -146,6 +150,43 @@ plugin
   .description('Remove a plugin from this project\'s enabled list')
   .action(async (name) => {
     await pluginDisableHandler({ name, projectRoot: projectRoot() })
+  })
+
+// Template commands
+const template = program.command('template').description('Manage rune templates')
+
+template
+  .command('list [source]')
+  .description('List available templates. [source] can be "local" (project config only) or a plugin name; omit to list all.')
+  .option('--format <format>', 'output format: md (default) or json', 'md')
+  .action(async (source, opts) => {
+    await templateListHandler({ source, format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
+  })
+
+template
+  .command('use <key>')
+  .description(
+    'Copy a template into the project as a new rune and register it in config.\n' +
+    '  local:name  — use a template defined in this project\'s config\n' +
+    '  plugin:name — use a template from a specific installed plugin\n' +
+    '  name        — auto-resolve: project config first, then installed plugins'
+  )
+  .option('--as <rune-key>', 'register the rune under a different key (default: template name)')
+  .option('--path <path>', 'file path for the rune (default: .context-runes/runes/<key>.js)')
+  .option('--name <name>', 'human-readable label shown in crunes list')
+  .option('--description <description>', 'short description of what context this rune provides')
+  .action(async (ref, opts) => {
+    await templateUseHandler({ ref, key: opts.as, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
+  })
+
+template
+  .command('create [name]')
+  .description('Scaffold a new template file and register it in config')
+  .option('--path <path>', 'file path for the template (default: .context-runes/templates/<name>.js)')
+  .option('--name <name>', 'display label shown in crunes template list (separate from the template key)')
+  .option('--description <description>', 'short description of what kind of rune this template produces')
+  .action(async (name, opts) => {
+    await templateCreateHandler({ name, path: opts.path, templateName: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 // Marketplace commands

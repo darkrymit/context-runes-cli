@@ -70,31 +70,98 @@ async function resolvePluginRune(config, key) {
 }
 
 /**
+ * Searches all enabled plugins for a rune with the given bare name.
+ * Returns a plugin match descriptor, or null if not found.
+ * Throws if the name matches runes in multiple plugins (ambiguous).
+ */
+async function resolveRuneFromPlugins(config, runeKey) {
+  const enabledPlugins = config.plugins ?? []
+  if (enabledPlugins.length === 0) return null
+
+  let registry
+  try { registry = await loadRegistry() } catch { return null }
+
+  const matches = []
+  for (const pluginKey of enabledPlugins) {
+    const entry = registry.plugins?.[pluginKey]
+    if (!entry) continue
+    let pluginJson
+    try { pluginJson = await loadPluginJson(entry.path) } catch { continue }
+    if ((pluginJson.runes ?? {})[runeKey]) {
+      matches.push({ pluginKey, runeKey, pluginDir: entry.path, pluginJson })
+    }
+  }
+
+  if (matches.length > 1) {
+    const names = matches.map(m => m.pluginKey.slice(m.pluginKey.indexOf('@') + 1)).join(', ')
+    throw new Error(`"${runeKey}" matches runes in multiple plugins: ${names}. Use plugin:${runeKey} to specify one.`)
+  }
+  return matches[0] ?? null
+}
+
+/**
  * Runs a rune and returns a Section[] array.
  * Routes to isolated-vm execution for plugin runes, in-process for local runes.
- * Returns null if key not in config.
+ * Returns null if key not in config and not found in any enabled plugin.
  *
+ * Key resolution order for a bare name (no prefix):
+ *   1. project config (config.runes)
+ *   2. enabled plugins (auto-resolve; errors if ambiguous)
+ *
+ * Prefix `local:name` forces resolution from project config only.
+ * Prefix `plugin:name` resolves directly from that plugin.
+ *
+ * @param {object}   opts       - { sections: string[]|null } — section filter hint
  * @param {string[]} _callStack - internal; tracks the call chain for circular detection
  */
-export async function runRune(dir, config, key, args, _callStack = []) {
+export async function runRune(dir, config, key, args, opts = {}, _callStack = []) {
+  // Strip `local:` prefix — forces resolution from project config only, skips plugin rune lookup
+  let localOnly = false
+  if (key.startsWith('local:')) {
+    key = key.slice(6)
+    localOnly = true
+  }
+
   if (_callStack.includes(key)) {
     throw new CircularRuneError([..._callStack, key])
   }
 
   const nextStack = [..._callStack, key]
-  const runeCallback = (childKey, childArgs) => runRune(dir, config, childKey, childArgs, nextStack)
+  // Child runes called via utils.rune() do not inherit the section filter
+  const runeCallback = (childKey, childArgs) => runRune(dir, config, childKey, childArgs, {}, nextStack)
 
   // Check if the key itself is a namespaced plugin rune ("marketplace@plugin:runeKey")
-  const pluginMatch = await resolvePluginRune(config, key)
+  const pluginMatch = localOnly ? null : await resolvePluginRune(config, key)
   if (pluginMatch) {
     const { pluginKey, runeKey, pluginDir } = pluginMatch
     const pluginJson = await loadPluginJson(pluginDir)
     const projectPerms = config.permissions?.[`${pluginKey}:${runeKey}`]
-    const result = await executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir: dir, opts: config, runeCallback })
+    const result = await executePluginRune({
+      pluginDir, runeKey, pluginJson, projectPerms, args,
+      projectDir: dir, opts: config, runeCallback,
+      sections: opts.sections ?? null,
+    })
     return normaliseResult(result)
   }
 
   const entry = getRune(config, key)
+
+  // Auto-resolve bare name from enabled plugins when not in project config
+  if (!entry && !localOnly) {
+    const autoMatch = await resolveRuneFromPlugins(config, key)
+    if (autoMatch) {
+      const { pluginKey, runeKey, pluginDir, pluginJson } = autoMatch
+      const projectPerms = config.permissions?.[`${pluginKey}:${runeKey}`]
+      const result = await executePluginRune({
+        pluginDir, runeKey, pluginJson, projectPerms, args,
+        projectDir: dir, opts: config, runeCallback,
+        sections: opts.sections ?? null,
+      })
+      return normaliseResult(result)
+    }
+    return null
+  }
+
   if (!entry) return null
 
   // Plugin alias — entry has a `plugin` field pointing to a plugin rune
@@ -104,7 +171,11 @@ export async function runRune(dir, config, key, args, _callStack = []) {
     const { pluginKey, runeKey, pluginDir } = aliasMatch
     const pluginJson = await loadPluginJson(pluginDir)
     const projectPerms = entry.permissions ?? config.permissions?.[`${pluginKey}:${runeKey}`]
-    const result = await executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir: dir, opts: config, runeCallback })
+    const result = await executePluginRune({
+      pluginDir, runeKey, pluginJson, projectPerms, args,
+      projectDir: dir, opts: config, runeCallback,
+      sections: opts.sections ?? null,
+    })
     return normaliseResult(result)
   }
 
@@ -112,7 +183,10 @@ export async function runRune(dir, config, key, args, _callStack = []) {
   const fullPath = join(dir, entry.path)
   const basePerms = entry.permissions ?? { allow: [], deny: [] }
   const effective = computeEffectivePermissions(basePerms, config.permissions?.[key])
-  const result = await runRuneInIsolate(fullPath, effective, args, dir, { runeCallback })
+  const result = await runRuneInIsolate(fullPath, effective, args, dir, {
+    runeCallback,
+    sections: opts.sections ?? null,
+  })
   return normaliseResult(result)
 }
 

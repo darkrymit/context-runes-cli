@@ -95,6 +95,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
   runeCallback = null,
   isolateMemoryMb = 128,
   isolateTimeoutMs = 30_000,
+  sections = null,
 } = {}) {
   const checkPermission = makePermissionChecker(effective)
   const utils           = createUtils(projectDir, checkPermission)
@@ -151,7 +152,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
           ${JSON.stringify(projectDir)},
           ${JSON.stringify(args)},
           utils,
-          {}
+          ${JSON.stringify({ sections })}
         );
         return JSON.stringify(r);
       })()`,
@@ -177,14 +178,19 @@ export async function runPluginRune(pluginDir, runeKey, pluginJson, effective, a
     runeCallback:     opts.runeCallback ?? null,
     isolateMemoryMb:  opts.isolateMemoryMb,
     isolateTimeoutMs: opts.isolateTimeoutMs,
+    sections:         opts.sections ?? null,
   })
 }
 
 /**
  * Compute effective permissions and run a plugin rune. Convenience wrapper for core.js.
  */
-export async function executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir, opts, runeCallback }) {
+export async function executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir, opts, runeCallback, sections }) {
   const runePerms = pluginJson.runes[runeKey]?.permissions ?? {}
   const effective = computeEffectivePermissions(runePerms, projectPerms)
-  return runPluginRune(pluginDir, runeKey, pluginJson, effective, args, projectDir, { ...opts, runeCallback })
+  return runPluginRune(pluginDir, runeKey, pluginJson, effective, args, projectDir, {
+    ...opts,
+    runeCallback,
+    sections,
+  })
 }
