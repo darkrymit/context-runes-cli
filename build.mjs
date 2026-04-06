@@ -1,5 +1,37 @@
 import * as esbuild from 'esbuild'
 import { chmodSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
+
+// Plugin: intercepts `import * as EMBEDDED from './embedded.js'` in runner.js
+// and returns the bootstrap source strings in memory — no file written to disk.
+const embedIsolateSourcesPlugin = {
+  name: 'embed-isolate-sources',
+  setup(build) {
+    build.onResolve({ filter: /\/embedded\.js$/ }, (args) => ({
+      path: args.path,
+      namespace: 'embed-isolate-sources',
+    }))
+
+    build.onLoad({ filter: /.*/, namespace: 'embed-isolate-sources' }, async () => {
+      const [mdSrc, treeSrc, utilsSrc, consoleSrc] = await Promise.all([
+        readFile('./src/utils/md.js', 'utf8'),
+        readFile('./src/utils/tree.js', 'utf8'),
+        readFile('./src/isolation/utils-bootstrap.js', 'utf8'),
+        readFile('./src/isolation/console-bootstrap.js', 'utf8'),
+      ])
+
+      return {
+        contents: [
+          `export const md      = ${JSON.stringify(mdSrc)}`,
+          `export const tree    = ${JSON.stringify(treeSrc)}`,
+          `export const utils   = ${JSON.stringify(utilsSrc)}`,
+          `export const console = ${JSON.stringify(consoleSrc)}`,
+        ].join('\n'),
+        loader: 'js',
+      }
+    })
+  },
+}
 
 await esbuild.build({
   entryPoints: ['src/cli.js'],
@@ -9,6 +41,7 @@ await esbuild.build({
   outfile: 'dist/cli.js',
   external: ['isolated-vm'],
   inject: ['./require-shim.js'],
+  plugins: [embedIsolateSourcesPlugin],
 })
 
 // Make executable on Unix/macOS

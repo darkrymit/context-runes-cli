@@ -2,25 +2,15 @@ import ivm from 'isolated-vm'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createRequire } from 'node:module'
-import { fileURLToPath } from 'node:url'
 import { createUtils } from '../utils/index.js'
 import { computeEffectivePermissions, makePermissionChecker } from './permissions.js'
 import { createModuleResolver } from './resolver.js'
+import * as EMBEDDED from './embedded.js'
 
-const __dirname   = path.dirname(fileURLToPath(import.meta.url))
 const hostRequire = createRequire(import.meta.url)
 
-// Static bootstrap module paths — compiled from real files, never inlined as strings.
-const PATHS = {
-  md:      path.join(__dirname, '../utils/md.js'),
-  tree:    path.join(__dirname, '../utils/tree.js'),
-  utils:   path.join(__dirname, 'utils-bootstrap.js'),
-  console: path.join(__dirname, 'console-bootstrap.js'),
-}
-
 async function compileStaticModule(isolate, key) {
-  const src = await fs.readFile(PATHS[key], 'utf8')
-  return isolate.compileModule(src, { filename: `crunes:${key}` })
+  return isolate.compileModule(EMBEDDED[key], { filename: `crunes:${key}` })
 }
 
 /**
