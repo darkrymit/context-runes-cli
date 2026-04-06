@@ -34,7 +34,7 @@ export async function handler({
 
     // Validate that specified plugin exists
     if (source && source !== 'local') {
-      const found = Object.keys(registry.plugins ?? {}).some(k => k.slice(k.indexOf('@') + 1) === source)
+      const found = Object.keys(registry.plugins ?? {}).some(k => k === source || k.slice(k.indexOf('@') + 1) === source)
       if (!found) {
         output.error(`Plugin "${source}" is not installed.`)
         process.exit(1)
@@ -43,7 +43,7 @@ export async function handler({
 
     for (const [pluginKey, pluginEntry] of Object.entries(registry.plugins ?? {})) {
       const pluginName = pluginKey.slice(pluginKey.indexOf('@') + 1)
-      if (source && source !== pluginName) continue
+      if (source && source !== pluginName && source !== pluginKey) continue
       if (!pluginEntry.path) continue
       let pluginJson
       try { pluginJson = await loadPluginJson(pluginEntry.path) } catch { continue }

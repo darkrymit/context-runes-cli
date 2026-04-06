@@ -33,7 +33,8 @@ async function resolveTemplate(sourceName, templateName, projectRoot) {
   const matches = []
   for (const [pluginKey, pluginEntry] of Object.entries(registry.plugins ?? {})) {
     const pluginName = pluginKey.slice(pluginKey.indexOf('@') + 1)
-    if (sourceName && sourceName !== pluginName) continue
+    // sourceName can be bare name or full marketplace@plugin key
+    if (sourceName && sourceName !== pluginName && sourceName !== pluginKey) continue
     if (!pluginEntry.path) continue
     let pluginJson
     try { pluginJson = await loadPluginJson(pluginEntry.path) } catch { continue }
