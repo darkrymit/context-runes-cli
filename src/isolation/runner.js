@@ -1,0 +1,200 @@
+import ivm from 'isolated-vm'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { createRequire } from 'node:module'
+import { fileURLToPath } from 'node:url'
+import { createUtils } from '../utils/index.js'
+import { computeEffectivePermissions, makePermissionChecker } from './permissions.js'
+import { createModuleResolver } from './resolver.js'
+
+const __dirname   = path.dirname(fileURLToPath(import.meta.url))
+const hostRequire = createRequire(import.meta.url)
+
+// Static bootstrap module paths — compiled from real files, never inlined as strings.
+const PATHS = {
+  md:      path.join(__dirname, '../utils/md.js'),
+  tree:    path.join(__dirname, '../utils/tree.js'),
+  utils:   path.join(__dirname, 'utils-bootstrap.js'),
+  console: path.join(__dirname, 'console-bootstrap.js'),
+}
+
+async function compileStaticModule(isolate, key) {
+  const src = await fs.readFile(PATHS[key], 'utf8')
+  return isolate.compileModule(src, { filename: `crunes:${key}` })
+}
+
+/**
+ * Inject I/O callbacks and utils into the isolate context.
+ *
+ * md.js and tree.js are compiled as actual ESM isolate modules.
+ * utils-bootstrap.js imports them and wires globalThis.utils.
+ * All modules come from real files on disk — no eval, no embedded code strings.
+ */
+async function injectUtils(isolate, context, utils, runeCallback) {
+  const jail = context.global
+
+  await jail.set('$__utils_fs_read', new ivm.Reference(async (relPath, opts) => {
+    return utils.fs.read(relPath, opts ? JSON.parse(opts) : undefined)
+  }))
+  await jail.set('$__utils_fs_exists', new ivm.Reference(async (relPath) => {
+    return utils.fs.exists(relPath)
+  }))
+  await jail.set('$__utils_fs_glob', new ivm.Reference(async (pattern, opts) => {
+    const results = await utils.fs.glob(pattern, opts ? JSON.parse(opts) : undefined)
+    return JSON.stringify(results)
+  }))
+  await jail.set('$__utils_shell', new ivm.Reference(async (cmd, opts) => {
+    const result = await utils.shell(cmd, opts ? JSON.parse(opts) : undefined)
+    if (typeof result === 'string') return result
+    return JSON.stringify(result)
+  }))
+  await jail.set('$__utils_section', new ivm.Reference((name, data, opts) => {
+    return JSON.stringify(utils.section(name, JSON.parse(data), opts ? JSON.parse(opts) : undefined))
+  }))
+  await jail.set('$__utils_rune', new ivm.Reference(async (key, argsJson) => {
+    const sections = await runeCallback(key, argsJson ? JSON.parse(argsJson) : [])
+    return JSON.stringify(sections)
+  }))
+
+  const [mdMod, treeMod, utilsMod] = await Promise.all([
+    compileStaticModule(isolate, 'md'),
+    compileStaticModule(isolate, 'tree'),
+    compileStaticModule(isolate, 'utils'),
+  ])
+
+  const noImports = (spec) => { throw new Error(`Unexpected import in pure util module: ${spec}`) }
+  await mdMod.instantiate(context, noImports)
+  await treeMod.instantiate(context, noImports)
+  await utilsMod.instantiate(context, (spec) => {
+    if (spec === 'crunes:md')   return mdMod
+    if (spec === 'crunes:tree') return treeMod
+    throw new Error(`Unexpected import in utils-bootstrap: ${spec}`)
+  })
+
+  await mdMod.evaluate()
+  await treeMod.evaluate()
+  await utilsMod.evaluate()  // sets globalThis.utils
+}
+
+async function injectConsole(isolate, context) {
+  const jail = context.global
+  await jail.set('$__log', new ivm.Reference((...args) => process.stdout.write(args.join(' ') + '\n')))
+  await jail.set('$__err', new ivm.Reference((...args) => process.stderr.write(args.join(' ') + '\n')))
+
+  const consoleMod = await compileStaticModule(isolate, 'console')
+  await consoleMod.instantiate(context, (spec) => { throw new Error(`Unexpected import in console-bootstrap: ${spec}`) })
+  await consoleMod.evaluate()
+}
+
+/**
+ * Core isolation runner — runs any rune file inside a fresh V8 isolate.
+ *
+ * @param {string}   runeFile         - absolute path to the rune .js file
+ * @param {object}   effective        - { allow: string[], deny: string[] }
+ * @param {string[]} args             - rune arguments
+ * @param {string}   projectDir       - project root (cwd for the rune)
+ * @param {string}   [nodeModulesDir] - node_modules path for import resolution (plugin only)
+ * @param {object}   [pluginDeps]     - declared deps from plugin.json (plugin only)
+ * @param {number}   [isolateMemoryMb]
+ * @param {number}   [isolateTimeoutMs]
+ */
+export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
+  nodeModulesDir = null,
+  pluginDeps = {},
+  pluginDir = null,
+  runeCallback = null,
+  isolateMemoryMb = 128,
+  isolateTimeoutMs = 30_000,
+} = {}) {
+  const checkPermission = makePermissionChecker(effective)
+  const utils           = createUtils(projectDir, checkPermission)
+
+  const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })
+  try {
+    const context = await isolate.createContext()
+
+    await context.global.set('$__hostRequire', new ivm.Reference((spec) => hostRequire(spec)))
+
+    await injectUtils(isolate, context, utils, runeCallback)
+    await injectConsole(isolate, context)
+
+    if (pluginDir != null) {
+      await context.global.set('CONTEXT_RUNES_PLUGIN_ROOT', pluginDir)
+    }
+
+    // Remove $__hostRequire from the global after bootstrap modules are instantiated.
+    // Builtin proxy modules call it during their own evaluation (triggered by runeMod.evaluate),
+    // so it must stay until then — but must not remain accessible to rune code after that.
+    // We delete it via context.eval after evaluate() completes below.
+
+    // Compile the rune module. Conditionally capture the generate export into globalThis
+    // so context.eval() can call it. The typeof guard prevents ReferenceError when the
+    // rune does not export generate — the missing-export check below handles that case.
+    const runeSrc    = await fs.readFile(runeFile, 'utf8')
+    const patchedSrc = runeSrc + '\nif (typeof generate !== "undefined") globalThis.__crunes_generate = generate;\n'
+    const runeMod    = await isolate.compileModule(patchedSrc, { filename: runeFile })
+
+    const resolver = createModuleResolver(
+      isolate,
+      path.dirname(runeFile),
+      nodeModulesDir ?? path.join(path.dirname(runeFile), 'node_modules'),
+      pluginDeps,
+      effective.allow,
+      effective.deny,
+    )
+    await runeMod.instantiate(context, resolver)
+    await runeMod.evaluate({ timeout: isolateTimeoutMs })
+
+    // Builtin proxy modules have now been evaluated — remove the host require bridge.
+    await context.eval('delete globalThis.$__hostRequire')
+
+    if (!await runeMod.namespace.get('generate', { reference: true })) {
+      throw new Error(`Rune "${runeFile}" does not export a generate() function.`)
+    }
+
+    // Drive the async generate() call from inside the isolate.
+    // __crunes_generate and utils are globals set above.
+    // context.eval with { promise: true } correctly awaits the async result.
+    const resultJson = await context.eval(
+      `(async () => {
+        const r = await __crunes_generate(
+          ${JSON.stringify(projectDir)},
+          ${JSON.stringify(args)},
+          utils,
+          {}
+        );
+        return JSON.stringify(r);
+      })()`,
+      { promise: true, timeout: isolateTimeoutMs }
+    )
+
+    return JSON.parse(resultJson)
+  } finally {
+    isolate.dispose()
+  }
+}
+
+/**
+ * Run a plugin rune in isolation. Resolves the rune file from pluginDir/runes/<runeKey>.js.
+ */
+export async function runPluginRune(pluginDir, runeKey, pluginJson, effective, args, projectDir, opts = {}) {
+  const runeFile       = path.join(pluginDir, 'runes', `${runeKey}.js`)
+  const nodeModulesDir = path.join(pluginDir, 'node_modules')
+  return runRuneInIsolate(runeFile, effective, args, projectDir, {
+    nodeModulesDir,
+    pluginDeps:       pluginJson.dependencies ?? {},
+    pluginDir,
+    runeCallback:     opts.runeCallback ?? null,
+    isolateMemoryMb:  opts.isolateMemoryMb,
+    isolateTimeoutMs: opts.isolateTimeoutMs,
+  })
+}
+
+/**
+ * Compute effective permissions and run a plugin rune. Convenience wrapper for core.js.
+ */
+export async function executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir, opts, runeCallback }) {
+  const runePerms = pluginJson.runes[runeKey]?.permissions ?? {}
+  const effective = computeEffectivePermissions(runePerms, projectPerms)
+  return runPluginRune(pluginDir, runeKey, pluginJson, effective, args, projectDir, { ...opts, runeCallback })
+}

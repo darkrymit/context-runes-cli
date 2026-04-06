@@ -26,7 +26,8 @@ export async function handler({
 
   const entries = keys.map(key => {
     const entry = getRune(config, key);
-    return { key, path: entry.path, name: entry.name ?? null, description: entry.description ?? null };
+    const source = entry.plugin ? `→ ${entry.plugin}` : (entry.path ?? '');
+    return { key, source, name: entry.name ?? null, description: entry.description ?? null };
   });
 
   if (format === 'json') {
@@ -35,19 +36,19 @@ export async function handler({
   }
 
   if (plain) {
-    for (const { key, name, description, path } of entries) {
-      process.stdout.write(`${key}\t${name ?? ''}\t${description ?? ''}\t${path}\n`);
+    for (const { key, name, description, source } of entries) {
+      process.stdout.write(`${key}\t${name ?? ''}\t${description ?? ''}\t${source}\n`);
     }
     return;
   }
 
   const table = new Table({
-    head: ['Key', 'Name', 'Description', 'Path'],
+    head: ['Key', 'Name', 'Description', 'Source'],
     style: { head: ['cyan'] },
   });
 
-  for (const { key, name, description, path } of entries) {
-    table.push([key, name ?? '', description ?? '', path]);
+  for (const { key, name, description, source } of entries) {
+    table.push([key, name ?? '', description ?? '', source]);
   }
 
   process.stdout.write(table.toString() + '\n');
