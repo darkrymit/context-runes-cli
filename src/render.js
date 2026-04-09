@@ -35,7 +35,13 @@ export function renderSection(section) {
   }
 
   const content = render(section.data);
-  if (content) parts.push(content);
+  if (content) {
+    if (section.data?.type === 'markdown') {
+      parts.push('```md\n' + content + '\n```');
+    } else {
+      parts.push(content);
+    }
+  }
 
   return parts.filter(Boolean).join('\n') || null;
 }
