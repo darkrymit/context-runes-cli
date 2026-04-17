@@ -15,8 +15,8 @@ Requires Node.js ≥ 20.
 ```
 crunes init                    Create .context-runes/config.json in the current project
 crunes create [key]            Scaffold a new rune and register it in config
-crunes use <key>               Use one or more runes and output the result
-crunes bench [key]             Time rune execution and report performance
+crunes use <key> [-a <key>...] Use one or more runes and output the result (use --fail-fast to stop on error)
+crunes bench [key]             Time rune execution and report performance (use --runs <n> to average)
 crunes list                    List all registered runes
 crunes version                 Print the installed version and check for updates
 ```
@@ -52,8 +52,9 @@ crunes marketplace search <query>  Search for plugins across all sources
 **Global flags:**
 
 ```
--y, --yes     Assume yes to all prompts (also auto-detected in non-TTY environments)
---plain       Plain output: no colors, no box-drawing — optimised for AI/pipe use
+-y, --yes      Assume yes to all prompts (also auto-detected in non-TTY environments)
+-p, --plain    Plain output: no colors, no box-drawing — optimised for AI/pipe use
+--cwd <path>   Project root to use instead of the current working directory
 ```
 
 **Output formats** (for `use` and `list`):
@@ -70,7 +71,21 @@ cd your-project
 crunes init               # creates .context-runes/config.json
 crunes create docs        # scaffolds .context-runes/runes/docs.js
 crunes use docs           # runs the rune and prints output
+crunes use docs -a api=v2 # runs multiple runes in batch
 ```
+
+## Key Syntax
+
+Commands that accept a `<key>` (like `crunes use` and `crunes bench`) support the following syntax:
+
+`[source:]name[=arg1,arg2][::section1,section2]`
+
+- `name`: The name of the rune (auto-resolved from project config first, then plugins).
+- `source:`: Forces resolution from a specific source.
+  - `local:name` resolves strictly from `.context-runes/config.json`.
+  - `my-plugin:name` resolves strictly from an installed plugin.
+- `=arg1,arg2`: Passes arguments to the rune (available as `args` in the API).
+- `::section1,section2`: Filters the output to only return specific sections.
 
 ## Rune API
 
