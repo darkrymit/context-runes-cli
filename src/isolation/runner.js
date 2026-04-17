@@ -4,6 +4,7 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 import { createUtils } from '../utils/index.js'
 import { computeEffectivePermissions, makePermissionChecker } from './permissions.js'
+import { isVerbose } from '../output.js'
 import { createModuleResolver } from './resolver.js'
 import * as EMBEDDED from './embedded.js'
 
@@ -100,12 +101,16 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
   const checkPermission = makePermissionChecker(effective)
   const utils           = createUtils(projectDir, checkPermission)
 
+  if (isVerbose) console.error(`[crunes:debug] creating Isolate...`)
   const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })
   try {
+    if (isVerbose) console.error(`[crunes:debug] creating Context...`)
     const context = await isolate.createContext()
 
+    if (isVerbose) console.error(`[crunes:debug] injecting $__hostRequire...`)
     await context.global.set('$__hostRequire', new ivm.Reference((spec) => hostRequire(spec)))
 
+    if (isVerbose) console.error(`[crunes:debug] injecting utils and console...`)
     await injectUtils(isolate, context, utils, runeCallback)
     await injectConsole(isolate, context)
 
@@ -123,6 +128,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     // rune does not export generate — the missing-export check below handles that case.
     const runeSrc    = await fs.readFile(runeFile, 'utf8')
     const patchedSrc = runeSrc + '\nif (typeof generate !== "undefined") globalThis.__crunes_generate = generate;\n'
+    if (isVerbose) console.error(`[crunes:debug] compiling Module...`)
     const runeMod    = await isolate.compileModule(patchedSrc, { filename: runeFile })
 
     const resolver = createModuleResolver(
@@ -133,10 +139,14 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
       effective.allow,
       effective.deny,
     )
+    if (isVerbose) console.error(`[crunes:debug] instantiating Module...`)
     await runeMod.instantiate(context, resolver)
+    
+    if (isVerbose) console.error(`[crunes:debug] evaluating Module...`)
     await runeMod.evaluate({ timeout: isolateTimeoutMs })
 
     // Builtin proxy modules have now been evaluated — remove the host require bridge.
+    if (isVerbose) console.error(`[crunes:debug] cleaning up $__hostRequire...`)
     await context.eval('delete globalThis.$__hostRequire')
 
     if (!await runeMod.namespace.get('generate', { reference: true })) {
@@ -146,6 +156,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     // Drive the async generate() call from inside the isolate.
     // __crunes_generate and utils are globals set above.
     // context.eval with { promise: true } correctly awaits the async result.
+    if (isVerbose) console.error(`[crunes:debug] extracting generate() result...`)
     const resultJson = await context.eval(
       `(async () => {
         const r = await __crunes_generate(
@@ -159,8 +170,10 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
       { promise: true, timeout: isolateTimeoutMs }
     )
 
+    if (isVerbose) console.error(`[crunes:debug] parsing isolate result...`)
     return JSON.parse(resultJson)
   } finally {
+    if (isVerbose) console.error(`[crunes:debug] disposing Isolate...`)
     isolate.dispose()
   }
 }

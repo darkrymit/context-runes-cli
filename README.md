@@ -255,6 +255,7 @@ Sections are separated by a blank line.
 
 ## Changelog
 
+- **v1.3.8**: Added granular trace logging inside `isolated-vm` lifecycle to pinpoint macOS segfaults.
 - **v1.3.7**: Hardened error catching and added `--verbose` trace logs around execution to debug silent crashes.
 - **v1.3.6**: Added `--verbose` global flag to print full stack traces on rune failures.
 - **v1.3.5**: Version bump to synchronize npm release.
