@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 import path from 'node:path'
+import { spawnSync } from 'node:child_process'
+
+const majorVersion = parseInt(process.versions.node.split('.')[0], 10)
+if (majorVersion >= 20 && !process.execArgv.includes('--no-node-snapshot')) {
+  const result = spawnSync(process.execPath, ['--no-node-snapshot', ...process.argv.slice(1)], { stdio: 'inherit' })
+  process.exit(result.status ?? 1)
+}
 import { Command } from 'commander'
 import { configure as configureOutput } from './output.js'
 import { handler as useHandler } from './commands/use.js'
@@ -29,7 +36,7 @@ const program = new Command()
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.3.8', '-v, --version')
+  .version('1.3.9', '-v, --version')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')
