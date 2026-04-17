@@ -255,7 +255,19 @@ Sections are separated by a blank line.
 
 ## Changelog
 
+- **v1.3.4**: Updated documentation to accurately reflect the latest CLI argument syntax, key parsing, and global flags.
 - **v1.3.3**: Fixed a bug causing `crunes create` to output a non-standard config shape, and fixed an `isolated-vm` relative module resolution issue that led to crashes in nested imports.
+- **v1.3.2**: Wrapped markdown sections in \`\`\`md\`\`\` fenced blocks.
+- **v1.3.1**: Added support for `marketplace@plugin:key` syntax in template list/use commands.
+- **v1.3.0**: Introduced the `use` command, `template` group, `bench`, `version`, and auto-resolve functionality.
+- **v1.2.1**: Fixed isolate bootstrap sources embedding via esbuild plugin.
+- **v1.2.0**: Bundled CLI with esbuild for a lean global install.
+- **v1.1.0**: Introduced plugin ecosystem, rune isolation, and composition.
+- **v1.0.6**: Migrated to the 'runes' naming convention.
+- **v1.0.5**: Reworked global options parsing.
+- **v1.0.4**: Fixed proper version update logic.
+- **v1.0.3**: Removed legacy handling code.
+- **v1.0.0**: Initial release.
 
 ## License
 
