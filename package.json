@@ -1,6 +1,6 @@
 {
   "name": "@darkrymit/context-runes",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "CLI tool for querying context-runes enrichers",
   "type": "module",
   "bin": {

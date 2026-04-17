@@ -255,6 +255,7 @@ Sections are separated by a blank line.
 
 ## Changelog
 
+- **v1.3.5**: Version bump to synchronize npm release.
 - **v1.3.4**: Updated documentation to accurately reflect the latest CLI argument syntax, key parsing, and global flags.
 - **v1.3.3**: Fixed a bug causing `crunes create` to output a non-standard config shape, and fixed an `isolated-vm` relative module resolution issue that led to crashes in nested imports.
 - **v1.3.2**: Wrapped markdown sections in \`\`\`md\`\`\` fenced blocks.
