@@ -29,14 +29,17 @@ const program = new Command()
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.3.6', '-v, --version')
+  .version('1.3.7', '-v, --version')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')
   .option('--verbose', 'print full error stack traces and other verbose output')
 
-program.hook('preAction', () => {
+program.hook('preAction', (thisCommand, actionCommand) => {
   configureOutput({ plain: !!program.opts().plain, verbose: !!program.opts().verbose })
+  if (program.opts().verbose) {
+    console.error(`[crunes:debug] Executing command: ${actionCommand.name()}`)
+  }
 })
 
 function projectRoot() {
@@ -236,4 +239,17 @@ marketplace
     await marketplaceBrowseHandler({ format: opts.format })
   })
 
-program.parse()
+process.on('uncaughtException', (err) => {
+  console.error('[crunes] FATAL UNCAUGHT EXCEPTION:', err)
+  process.exit(1)
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[crunes] FATAL UNHANDLED REJECTION:', reason)
+  process.exit(1)
+})
+
+program.parseAsync(process.argv).catch(err => {
+  console.error('[crunes] FATAL CLI ERROR:', err)
+  process.exit(1)
+})

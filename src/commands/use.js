@@ -26,7 +26,9 @@ export async function handler({
 
     let sections
     try {
+      if (isVerbose) console.error(`[crunes:debug] Loading rune "${key}"`)
       sections = await runRune(projectRoot, config, key, args, { sections: sectionFilter })
+      if (isVerbose) console.error(`[crunes:debug] Rune "${key}" completed with ${sections?.length ?? 0} sections`)
     } catch (err) {
       const msg = isVerbose ? (err.stack || err.message) : err.message
       output.error(`Rune "${key}" failed: \n${msg}`)
