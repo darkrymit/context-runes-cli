@@ -106,9 +106,11 @@ export async function handler({
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf8')); } catch {}
   }
-  const entry = name || description
-    ? { path: runeRelPath, ...(name && { name }), ...(description && { description }) }
-    : runeRelPath;
+  const entry = {
+    path: runeRelPath,
+    ...(name && { name }),
+    ...(description && { description })
+  };
   config.runes = { ...(config.runes ?? {}), [key]: entry };
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 

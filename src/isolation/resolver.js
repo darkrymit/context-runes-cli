@@ -44,11 +44,12 @@ export default hostExports.default ?? hostExports;
     return mod
   }
 
-  return async function moduleResolver(specifier) {
+  return async function moduleResolver(specifier, referrer) {
     // Step 1 — relative or absolute path: plugin's own files
     if (specifier.startsWith('.') || specifier.startsWith('/')) {
-      const absPath = path.resolve(pluginDir, specifier)
-      return compileFile(specifier, absPath)
+      const baseDir = referrer?.filename ? path.dirname(referrer.filename) : pluginDir
+      const absPath = path.resolve(baseDir, specifier)
+      return compileFile(absPath, absPath) // Use absPath as cache key instead of specifier
     }
 
     // Step 2 — safe Node built-in

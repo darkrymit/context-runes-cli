@@ -77,9 +77,11 @@ export async function handler({
     try { config = JSON.parse(readFileSync(configPath, 'utf8')) } catch {}
   }
 
-  const entry = templateName || description
-    ? { path: templateRelPath, ...(templateName && { name: templateName }), ...(description && { description }) }
-    : templateRelPath
+  const entry = {
+    path: templateRelPath,
+    ...(templateName && { name: templateName }),
+    ...(description && { description })
+  }
   config.templates = { ...(config.templates ?? {}), [name]: entry }
   writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n')
 

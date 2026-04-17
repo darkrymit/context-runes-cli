@@ -15,10 +15,18 @@ Requires Node.js ≥ 20.
 ```
 crunes init                    Create .context-runes/config.json in the current project
 crunes create [key]            Scaffold a new rune and register it in config
-crunes query <key> [args...]   Query a rune and print its output
-crunes run <key> [args...]     Alias for query --format md
-crunes list                    List all registered rune keys
-crunes validate                Check that all registered runes exist and export generate()
+crunes use <key>               Use one or more runes and output the result
+crunes bench [key]             Time rune execution and report performance
+crunes list                    List all registered runes
+crunes version                 Print the installed version and check for updates
+```
+
+**Template management:**
+
+```
+crunes template list [source]  List available templates
+crunes template use <key>      Copy a template into the project as a new rune
+crunes template create [name]  Scaffold a new template file
 ```
 
 **Plugin management:**
@@ -48,7 +56,7 @@ crunes marketplace search <query>  Search for plugins across all sources
 --plain       Plain output: no colors, no box-drawing — optimised for AI/pipe use
 ```
 
-**Output formats** (for `query` and `list`):
+**Output formats** (for `use` and `list`):
 
 ```
 --format md     Human-readable markdown output (default)
@@ -61,7 +69,7 @@ crunes marketplace search <query>  Search for plugins across all sources
 cd your-project
 crunes init               # creates .context-runes/config.json
 crunes create docs        # scaffolds .context-runes/runes/docs.js
-crunes query docs         # runs the rune and prints output
+crunes use docs           # runs the rune and prints output
 ```
 
 ## Rune API
@@ -75,9 +83,9 @@ export async function generate(dir, args, utils, opts) { ... }
 | Parameter | Description |
 |---|---|
 | `dir` | Absolute path to the project root |
-| `args` | `string[]` parsed from `$key(arg1, arg2)` tokens |
+| `args` | `string[]` parsed from `$key=arg1,arg2` tokens |
 | `utils` | Injected utilities — see below |
-| `opts` | Config options passed through from the CLI |
+| `opts` | Config options (e.g. `opts.sections` for performance hinting) |
 
 ### Return values
 
@@ -179,7 +187,7 @@ crunes plugin install my-marketplace@my-plugin
 Plugin runes are addressed as `pluginName:runeKey`:
 
 ```bash
-crunes query my-plugin:some-rune
+crunes use my-plugin:some-rune
 ```
 
 ### Plugin manifest (`plugin.json`)
@@ -229,6 +237,10 @@ Each section renders as:
 ```
 
 Sections are separated by a blank line.
+
+## Changelog
+
+- **v1.3.3**: Fixed a bug causing `crunes create` to output a non-standard config shape, and fixed an `isolated-vm` relative module resolution issue that led to crashes in nested imports.
 
 ## License
 
