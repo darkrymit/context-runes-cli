@@ -1,9 +1,11 @@
 import chalk from 'chalk';
 
 let _plain = false;
+export let isVerbose = false;
 
-export function configure({ plain = false } = {}) {
+export function configure({ plain = false, verbose = false } = {}) {
   _plain = plain;
+  isVerbose = verbose;
   if (plain) chalk.level = 0;
 }
 

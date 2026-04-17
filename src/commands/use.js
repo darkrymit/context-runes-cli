@@ -1,6 +1,6 @@
 import { loadConfig, runRune } from '../core.js'
 import { renderSection } from '../render.js'
-import { output } from '../output.js'
+import { output, isVerbose } from '../output.js'
 import { parseKeyToken } from '../parse-key-token.js'
 
 export async function handler({
@@ -28,7 +28,8 @@ export async function handler({
     try {
       sections = await runRune(projectRoot, config, key, args, { sections: sectionFilter })
     } catch (err) {
-      output.error(`Rune "${key}" failed: ${err.message}`)
+      const msg = isVerbose ? (err.stack || err.message) : err.message
+      output.error(`Rune "${key}" failed: \n${msg}`)
       anyFailed = true
       if (failFast) process.exit(1)
       continue
