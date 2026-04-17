@@ -36,7 +36,7 @@ const program = new Command()
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.3.9', '-v, --version')
+  .version('1.3.10', '-v, --version')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')
@@ -255,6 +255,13 @@ process.on('unhandledRejection', (reason) => {
   console.error('[crunes] FATAL UNHANDLED REJECTION:', reason)
   process.exit(1)
 })
+
+// -v is contextual: acts as --verbose when a command is present, --version when used alone
+const hasCommand = process.argv.length > 2 && !process.argv[2].startsWith('-')
+if (hasCommand) {
+  const vIndex = process.argv.indexOf('-v')
+  if (vIndex !== -1) process.argv[vIndex] = '--verbose'
+}
 
 program.parseAsync(process.argv).catch(err => {
   console.error('[crunes] FATAL CLI ERROR:', err)

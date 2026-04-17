@@ -52,9 +52,11 @@ crunes marketplace search <query>  Search for plugins across all sources
 **Global flags:**
 
 ```
--y, --yes      Assume yes to all prompts (also auto-detected in non-TTY environments)
--p, --plain    Plain output: no colors, no box-drawing — optimised for AI/pipe use
---cwd <path>   Project root to use instead of the current working directory
+-v, --version         Print version number (or --verbose / -v if a command is present)
+-y, --yes             Assume yes to all prompts (also auto-detected in non-TTY environments)
+-p, --plain           Plain output: no colors, no box-drawing — optimised for AI/pipe use
+    --cwd <path>      Project root to use instead of the current working directory
+    --verbose, -v     Print full stack traces on errors (contextual: -v acts as --verbose when a command is given)
 ```
 
 **Output formats** (for `use` and `list`):
