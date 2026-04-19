@@ -2,7 +2,7 @@ import Table from 'cli-table3'
 import { loadConfig } from '../../core.js'
 import { loadRegistry } from '../../plugins/registry.js'
 import { loadPluginJson } from '../../plugins/manifest.js'
-import { output } from '../../output.js'
+import { output } from '../../utils/output.js'
 
 export async function handler({
   source,

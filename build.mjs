@@ -14,8 +14,8 @@ const embedIsolateSourcesPlugin = {
 
     build.onLoad({ filter: /.*/, namespace: 'embed-isolate-sources' }, async () => {
       const [mdSrc, treeSrc, utilsSrc, consoleSrc] = await Promise.all([
-        readFile('./src/utils/md.js', 'utf8'),
-        readFile('./src/utils/tree.js', 'utf8'),
+        readFile('./src/api/utils/md.js', 'utf8'),
+        readFile('./src/api/utils/tree.js', 'utf8'),
         readFile('./src/isolation/utils-bootstrap.js', 'utf8'),
         readFile('./src/isolation/console-bootstrap.js', 'utf8'),
       ])

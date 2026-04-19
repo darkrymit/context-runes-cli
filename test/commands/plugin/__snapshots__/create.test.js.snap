@@ -1,0 +1,106 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`changelogMd > matches snapshot 1`] = `
+"# Changelog
+
+## 1.0.0
+
+- Initial release
+"
+`;
+
+exports[`exampleRune > matches snapshot 1`] = `
+"// Ready-to-run rune — runs directly from the plugin install location.
+// Users activate it by adding your plugin to their project config.
+
+export async function generate(dir, args, utils, opts) {
+  // dir            — absolute path to the user's project root
+  // args           — string[] passed via $example(arg1, arg2)
+  // utils          — { md, tree, section, fs, json, shell, rune }
+  // opts.sections  — string[] | null — requested sections (performance hint)
+
+  return utils.section('example', {
+    type: 'markdown',
+    content: utils.md.h3('Example') + '\\n' + utils.md.ul(['Replace with real output']),
+  });
+}
+"
+`;
+
+exports[`exampleTemplate > matches snapshot 1`] = `
+"// Template rune — copied into the user's project by \`crunes template use\`.
+// Edit this file to define what a new rune looks like when scaffolded from your plugin.
+
+export async function generate(dir, args, utils, opts) {
+  return utils.section('example', {
+    type: 'markdown',
+    content: utils.md.h3('Example') + '\\n' + utils.md.ul(['Replace with real output']),
+  });
+}
+"
+`;
+
+exports[`marketplaceJson > matches snapshot 1`] = `
+"{
+  "format": "1",
+  "name": "my-plugin",
+  "description": "A test plugin",
+  "owner": {
+    "name": "Alice"
+  },
+  "plugins": [
+    {
+      "name": "my-plugin",
+      "description": "A test plugin",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alice"
+      },
+      "source": "./",
+      "category": "runes"
+    }
+  ]
+}
+"
+`;
+
+exports[`pluginJson > matches snapshot 1`] = `
+"{
+  "format": "1",
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "A test plugin",
+  "author": {
+    "name": "Alice"
+  },
+  "license": "MIT",
+  "keywords": [],
+  "runes": {
+    "example": {
+      "name": "Example Rune",
+      "description": "Replace with your rune description",
+      "permissions": {
+        "allow": []
+      }
+    }
+  },
+  "templates": {
+    "example-template": {
+      "name": "Example Template",
+      "description": "Replace with your template description"
+    }
+  }
+}
+"
+`;
+
+exports[`readmeMd > matches snapshot 1`] = `
+"# my-plugin
+
+A test plugin
+
+## Installation
+
+Add this plugin via the context-runes marketplace.
+"
+`;

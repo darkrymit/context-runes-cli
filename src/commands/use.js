@@ -1,7 +1,32 @@
 import { loadConfig, runRune } from '../core.js'
-import { renderSection } from '../render.js'
-import { output, isVerbose } from '../output.js'
-import { parseKeyToken } from '../parse-key-token.js'
+import { renderSection } from '../utils/render.js'
+import { output, isVerbose } from '../utils/output.js'
+
+function parseKeyToken(token) {
+  let rest = token
+  let sections = null
+
+  const dblColonIdx = rest.indexOf('::')
+  if (dblColonIdx !== -1) {
+    const sectionStr = rest.slice(dblColonIdx + 2)
+    const parsed = sectionStr.split(',').map(s => s.trim()).filter(Boolean)
+    sections = parsed.length > 0 ? parsed : null
+    rest = rest.slice(0, dblColonIdx)
+  }
+
+  let key
+  let args = []
+  const eqIdx = rest.indexOf('=')
+  if (eqIdx !== -1) {
+    key = rest.slice(0, eqIdx)
+    const argStr = rest.slice(eqIdx + 1)
+    args = argStr.split(',').map(a => a.trim()).filter(Boolean)
+  } else {
+    key = rest
+  }
+
+  return { key, args, sections }
+}
 
 export async function handler({
   keys,

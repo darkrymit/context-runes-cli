@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { intro, outro, confirm, cancel } from '@clack/prompts';
-import { output } from '../output.js';
+import { output } from '../utils/output.js';
 
 const EMPTY_CONFIG = JSON.stringify({ runes: {} }, null, 2) + '\n';
 

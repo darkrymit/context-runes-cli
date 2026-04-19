@@ -19,6 +19,11 @@ globalThis.utils = {
   rune: (key, args) => $__utils_rune
     .apply(undefined, [key, args ? JSON.stringify(args) : undefined], { result: { promise: true } })
     .then(JSON.parse),
+  json: {
+    read:   (p, o) => $__utils_json_read.apply(undefined, [p, o ? JSON.stringify(o) : undefined], { result: { promise: true } }).then(JSON.parse),
+    get:    (p, q, d) => $__utils_json_get.apply(undefined, [p, q, d !== undefined ? JSON.stringify(d) : undefined], { result: { promise: true } }).then(JSON.parse),
+    getAll: (p, q, d) => $__utils_json_getAll.apply(undefined, [p, q, d !== undefined ? JSON.stringify(d) : undefined], { result: { promise: true } }).then(JSON.parse),
+  },
   md,
   tree,
 }

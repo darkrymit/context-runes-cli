@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks'
 import chalk from 'chalk'
 import { loadConfig, runRune, getRune } from '../core.js'
-import { output } from '../output.js'
+import { output } from '../utils/output.js'
 
 const FAST_MS  = 200
 const SLOW_MS  = 1000

@@ -8,7 +8,7 @@ if (majorVersion >= 20 && !process.execArgv.includes('--no-node-snapshot')) {
   process.exit(result.status ?? 1)
 }
 import { Command } from 'commander'
-import { configure as configureOutput } from './output.js'
+import { configure as configureOutput } from './utils/output.js'
 import { handler as useHandler } from './commands/use.js'
 import { handler as listHandler } from './commands/list.js'
 import { handler as initHandler } from './commands/init.js'
@@ -19,6 +19,7 @@ import { handler as pluginListHandler } from './commands/plugin/list.js'
 import { handler as pluginUpdateHandler } from './commands/plugin/update.js'
 import { handler as pluginEnableHandler } from './commands/plugin/enable.js'
 import { handler as pluginDisableHandler } from './commands/plugin/disable.js'
+import { handler as pluginCreateHandler } from './commands/plugin/create.js'
 import { handler as marketplaceAddHandler } from './commands/marketplace/add.js'
 import { handler as marketplaceRemoveHandler } from './commands/marketplace/remove.js'
 import { handler as marketplaceListHandler } from './commands/marketplace/list.js'
@@ -27,6 +28,8 @@ import { handler as marketplaceUpdateHandler } from './commands/marketplace/upda
 import { handler as marketplaceBrowseHandler } from './commands/marketplace/browse.js'
 import { handler as benchmarkHandler } from './commands/benchmark.js'
 import { handler as versionHandler } from './commands/version.js'
+import { handler as doctorHandler } from './commands/doctor.js'
+import { handler as checkHandler } from './commands/check.js'
 import { handler as templateListHandler } from './commands/template/list.js'
 import { handler as templateUseHandler } from './commands/template/use.js'
 import { handler as templateCreateHandler } from './commands/template/create.js'
@@ -77,6 +80,20 @@ program
   .option('--no-check', 'skip the npm update check')
   .action(async (opts) => {
     await versionHandler({ check: opts.check, plain: !!program.opts().plain })
+  })
+
+program
+  .command('doctor')
+  .description('Verify environment and project setup')
+  .action(async () => {
+    await doctorHandler({ projectRoot: projectRoot() })
+  })
+
+program
+  .command('check <key>')
+  .description('Run a rune and validate its output shape')
+  .action(async (key) => {
+    await checkHandler({ key, projectRoot: projectRoot() })
   })
 
 program
@@ -161,6 +178,17 @@ plugin
   .description('Remove a plugin from this project\'s enabled list')
   .action(async (name) => {
     await pluginDisableHandler({ name, projectRoot: projectRoot() })
+  })
+
+plugin
+  .command('create [name]')
+  .description('Scaffold a new plugin directory with all required files')
+  .option('--description <text>', 'short description for plugin.json and marketplace.json')
+  .option('--author <name>', 'author name (default: git config user.name)')
+  .option('--license <spdx>', 'SPDX license identifier (default: MIT)')
+  .option('--out <path>', 'output directory (default: ./<name>)')
+  .action(async (name, opts) => {
+    await pluginCreateHandler({ name, description: opts.description, author: opts.author, license: opts.license, out: opts.out, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 // Template commands

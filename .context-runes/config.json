@@ -1,0 +1,12 @@
+{
+  "runes": {
+    "test": {
+      "path": ".context-runes/runes/test2.js"
+    },
+    "m": {
+      "path": ".context-runes/runes/m.js",
+      "name": "Human-readable label for crunes list",
+      "description": "What context does this rune provide?"
+    }
+  }
+}

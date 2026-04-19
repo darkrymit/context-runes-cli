@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`format (tree style) > matches snapshot 1`] = `
+"root        Root
+├── src         Source files
+│   ├── index       Entry point
+│   └── utils       Utilities
+└── dist        Output"
+`;

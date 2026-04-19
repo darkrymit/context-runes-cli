@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { intro, outro, text, cancel } from '@clack/prompts'
-import { output } from '../../output.js'
+import { output } from '../../utils/output.js'
 
 function templateStub(name) {
   return (

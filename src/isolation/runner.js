@@ -2,9 +2,9 @@ import ivm from 'isolated-vm'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createRequire } from 'node:module'
-import { createUtils } from '../utils/index.js'
+import { createUtils } from '../api/utils/index.js'
 import { computeEffectivePermissions, makePermissionChecker } from './permissions.js'
-import { isVerbose } from '../output.js'
+import { isVerbose } from '../utils/output.js'
 import { createModuleResolver } from './resolver.js'
 import * as EMBEDDED from './embedded.js'
 
@@ -45,6 +45,18 @@ async function injectUtils(isolate, context, utils, runeCallback) {
   await jail.set('$__utils_rune', new ivm.Reference(async (key, argsJson) => {
     const sections = await runeCallback(key, argsJson ? JSON.parse(argsJson) : [])
     return JSON.stringify(sections)
+  }))
+  await jail.set('$__utils_json_read', new ivm.Reference(async (relPath, optsJson) => {
+    const result = await utils.json.read(relPath, optsJson ? JSON.parse(optsJson) : undefined)
+    return JSON.stringify(result)
+  }))
+  await jail.set('$__utils_json_get', new ivm.Reference(async (relPath, jsonPath, defaultJson) => {
+    const result = await utils.json.get(relPath, jsonPath, defaultJson !== undefined ? JSON.parse(defaultJson) : undefined)
+    return JSON.stringify(result)
+  }))
+  await jail.set('$__utils_json_getAll', new ivm.Reference(async (relPath, jsonPath, defaultJson) => {
+    const result = await utils.json.getAll(relPath, jsonPath, defaultJson !== undefined ? JSON.parse(defaultJson) : undefined)
+    return JSON.stringify(result)
   }))
 
   const [mdMod, treeMod, utilsMod] = await Promise.all([

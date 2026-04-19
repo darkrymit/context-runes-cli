@@ -1,6 +1,6 @@
 import Table from 'cli-table3';
 import { loadConfig, getRune } from '../core.js';
-import { output } from '../output.js';
+import { output } from '../utils/output.js';
 
 export async function handler({
   format = 'md',

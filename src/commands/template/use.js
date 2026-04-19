@@ -4,7 +4,7 @@ import { intro, outro, confirm, cancel } from '@clack/prompts'
 import { loadConfig } from '../../core.js'
 import { loadRegistry, resolvePluginKey } from '../../plugins/registry.js'
 import { loadPluginJson } from '../../plugins/manifest.js'
-import { output } from '../../output.js'
+import { output } from '../../utils/output.js'
 
 /**
  * Resolve a template given an optional source name and template name.
