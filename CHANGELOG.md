@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1] - 2026-04-20
+
+### Fixed
+- Extracted CLI program factory to `src/program.js` to enable isolated testing of command definitions and completion logic.
+- Fixed shell completion handlers to correctly receive the program instance, resolving failures in `bash`, `zsh`, `fish`, and `powershell` tab-completion.
+- Formatted completion choices to ensure consistent behavior across different shells.
+
+---
+
 ## [1.4.0] - 2026-04-20
 
 ### Added

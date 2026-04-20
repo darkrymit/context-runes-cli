@@ -12,8 +12,8 @@ export async function generate(dir, args, utils) {
   const lockVersion = await utils.json.get('package-lock.json', '$.version', 'unknown')
   const name        = await utils.json.get('package.json', '$.name', '')
 
-  const cliSrc = await utils.fs.read('src/cli.js', { throw: false }) ?? ''
-  const cliVersionMatch = cliSrc.match(/\.version\(['"]([^'"]+)['"]/)
+  const programSrc = await utils.fs.read('src/program.js', { throw: false }) ?? ''
+  const cliVersionMatch = programSrc.match(/\.version\(['"]([^'"]+)['"]/)
   const cliVersion = cliVersionMatch ? cliVersionMatch[1] : 'unknown'
 
   // Recent git commits (last 10)

@@ -8,7 +8,7 @@
         "allow": [
           "fs.read:./package.json",
           "fs.read:./package-lock.json",
-          "fs.read:./src/cli.js",
+          "fs.read:./src/program.js",
           "fs.read:./CHANGELOG.md",
           "shell:git log *",
           "shell:git rev-parse *",
