@@ -61,7 +61,8 @@ export function createFsUtils(dir, checkPermission, pluginDir = null) {
       if (path.isAbsolute(pattern)) {
         throw new Error('utils.fs.glob does not support absolute patterns — use a relative pattern.')
       }
-      if (checkPermission) checkPermission('fs.glob', pattern)
+      const token = canonicalizePath(dir, pattern)
+      if (checkPermission) checkPermission('fs.glob', token)
       const results = await glob(pattern, {
         cwd: dir,
         ignore,

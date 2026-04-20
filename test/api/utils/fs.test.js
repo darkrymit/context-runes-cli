@@ -193,4 +193,10 @@ describe('createFsUtils — glob', () => {
     const fsUtils = createFsUtils(dir, null)
     await expect(fsUtils.glob('/etc/**')).rejects.toThrow('absolute')
   })
+  it('canonicalizes glob pattern for permission check', async () => {
+    const spy = vi.fn()
+    const fsUtils = createFsUtils(dir, spy)
+    await fsUtils.glob('src/*.ts')
+    expect(spy).toHaveBeenCalledWith('fs.glob', './src/*.ts')
+  })
 })

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.3] - 2026-04-21
+
+### Fixed
+- Fixed `fs.glob` permission enforcement. Glob patterns are now canonicalized (ensuring a `./` prefix for relative paths) before being checked against the permission list, resolving a regression where `fs.glob` calls were incorrectly denied when using the normalized syntax.
+
+---
+
 ## [1.4.2] - 2026-04-20
 
 ### Added
