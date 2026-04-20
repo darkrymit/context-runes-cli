@@ -39,7 +39,7 @@ const program = new Command()
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.3.10', '-v, --version')
+  .version('1.3.12', '-v, --version')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')

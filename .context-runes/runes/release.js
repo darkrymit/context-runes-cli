@@ -12,6 +12,10 @@ export async function generate(dir, args, utils) {
   const lockVersion = await utils.json.get('package-lock.json', '$.version', 'unknown')
   const name        = await utils.json.get('package.json', '$.name', '')
 
+  const cliSrc = await utils.fs.read('src/cli.js', { throw: false }) ?? ''
+  const cliVersionMatch = cliSrc.match(/\.version\(['"]([^'"]+)['"]/)
+  const cliVersion = cliVersionMatch ? cliVersionMatch[1] : 'unknown'
+
   // Recent git commits (last 10)
   const gitLog = await utils.shell(
     'git log --oneline -10 --no-decorate',
@@ -49,6 +53,7 @@ export async function generate(dir, args, utils) {
           ['Package',      md.code(name)],
           ['Version',      md.code(version)],
           ['Lock version', lockVersion === version ? `${md.code(lockVersion)} ✓` : `${md.code(lockVersion)} ⚠ out of sync`],
+          ['CLI version',  cliVersion === version ? `${md.code(cliVersion)} ✓` : `${md.code(cliVersion)} ⚠ out of sync`],
           ['Branch',       md.code(branch || '—')],
           ['Last tag',     md.code(lastTag || '—')],
           ['Unpushed',     unpushed ? `${unpushed} commit(s)` : '0 (in sync)'],

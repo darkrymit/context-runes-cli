@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.12] - 2026-04-20
+
+### Added
+- Added `AGENTS.md` and symlinks (`GEMINI.md`, `CLAUDE.md`) to guide AI coding assistants on project architecture and release workflows.
+- Improved the `release` context rune to dynamically monitor version synchronization across `package.json`, `package-lock.json`, and `src/cli.js`.
+
+### Fixed
+- Fixed CI workflow to correctly use `npm test` (Vitest) instead of Node's built-in test runner.
+- Replaced the `prepare` lifecycle hook with `prepack` in `package.json` to avoid redundant builds during `npm install`.
+- Synchronized internal CLI version with `package.json`.
+
+---
+
 ## [1.3.11] - 2026-04-20
 
 ### Changed
