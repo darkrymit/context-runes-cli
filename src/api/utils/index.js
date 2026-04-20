@@ -11,9 +11,10 @@ function section(name, data, { title, attrs } = {}) {
 /**
  * @param {string} dir - project root directory (cwd for rune)
  * @param {Function|null} checkPermission - permission checker; null = local rune (ungated)
+ * @param {string|null} pluginDir - plugin root dir; enables @plugin/ paths
  */
-export function createUtils(dir, checkPermission = null) {
-  const fs = createFsUtils(dir, checkPermission)
+export function createUtils(dir, checkPermission = null, pluginDir = null) {
+  const fs = createFsUtils(dir, checkPermission, pluginDir)
   return {
     md,
     tree: treeUtils,

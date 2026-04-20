@@ -6,10 +6,10 @@
       "description": "Current version, branch/tag status, recent commits, changelog, and release process",
       "permissions": {
         "allow": [
-          "fs.read:package.json",
-          "fs.read:package-lock.json",
-          "fs.read:src/cli.js",
-          "fs.read:CHANGELOG.md",
+          "fs.read:./package.json",
+          "fs.read:./package-lock.json",
+          "fs.read:./src/cli.js",
+          "fs.read:./CHANGELOG.md",
           "shell:git log *",
           "shell:git rev-parse *",
           "shell:git describe *",

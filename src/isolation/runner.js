@@ -110,8 +110,11 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
   isolateTimeoutMs = 30_000,
   sections = null,
 } = {}) {
-  const checkPermission = makePermissionChecker(effective)
-  const utils           = createUtils(projectDir, checkPermission)
+  const augmented = pluginDir
+    ? { allow: [...effective.allow, 'fs.read:@plugin/**'], deny: effective.deny }
+    : effective
+  const checkPermission = makePermissionChecker(augmented)
+  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null)
 
   if (isVerbose) console.error(`[crunes:debug] creating Isolate...`)
   const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })

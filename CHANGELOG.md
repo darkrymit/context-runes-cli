@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-04-20
+
+### Added
+- Added `crunes completions` command group with shell-specific handlers for bash, zsh, fish, and PowerShell.
+- Added `crunes completions install <shell>` to automatically append the completion hook to the appropriate shell profile (idempotent).
+- Completion candidates dynamically include rune keys from the current project config and plugin names from the global registry.
+- Added `@plugin/` path prefix support in `utils.fs` so plugin runes can read files relative to their own plugin directory.
+- Added `~/` path prefix support in `utils.fs` to resolve paths relative to the user's home directory.
+
+### Changed
+- Refactored `src/cli.js` to lazy-load all command handlers via dynamic `import()` at action time, reducing startup overhead for commands that are not invoked.
+- Reworked `utils.fs` permission token generation: paths are now canonicalized to `./`-relative form before being checked against the permission list, making permission declarations consistent regardless of how the path was passed.
+- Plugin runes automatically receive `fs.read:@plugin/**` in their effective permission set.
+
+---
+
 ## [1.3.12] - 2026-04-20
 
 ### Added

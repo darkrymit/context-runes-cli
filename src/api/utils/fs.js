@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import path from 'node:path'
 import { glob } from 'tinyglobby'
 
@@ -6,19 +7,36 @@ function stripBom(str) {
   return str.charCodeAt(0) === 0xfeff ? str.slice(1) : str
 }
 
-function assertInsideDir(root, abs) {
-  const resolvedRoot = path.resolve(root)
-  if (abs !== resolvedRoot && !abs.startsWith(resolvedRoot + path.sep)) {
-    throw new Error(`Path traversal denied: path is outside project root`)
-  }
+function canonicalizePath(dir, inputPath) {
+  const p = inputPath.replace(/\\/g, '/')
+
+  if (p.startsWith('@plugin/')) return p
+  if (p === '~' || p.startsWith('~/')) return p
+  if (path.isAbsolute(inputPath)) return p
+
+  const resolved = path.resolve(dir, inputPath)
+  const rel = path.relative(dir, resolved).replace(/\\/g, '/')
+  return rel.startsWith('..') ? rel : './' + rel
 }
 
-export function createFsUtils(dir, checkPermission) {
+function resolveToAbs(dir, pluginDir, inputPath) {
+  if (inputPath.startsWith('@plugin/')) {
+    if (!pluginDir) throw new Error('@plugin/ paths are only available in plugin runes')
+    return path.join(pluginDir, inputPath.slice('@plugin/'.length))
+  }
+  if (inputPath === '~' || inputPath.startsWith('~/') || inputPath.startsWith('~\\')) {
+    return path.join(os.homedir(), inputPath.slice(1))
+  }
+  if (path.isAbsolute(inputPath)) return inputPath
+  return path.resolve(dir, inputPath)
+}
+
+export function createFsUtils(dir, checkPermission, pluginDir = null) {
   return {
     async read(relPath, { throw: shouldThrow = true } = {}) {
-      if (checkPermission) checkPermission('fs.read', relPath)
-      const abs = path.resolve(dir, relPath)
-      assertInsideDir(dir, abs)
+      const token = canonicalizePath(dir, relPath)
+      const abs = resolveToAbs(dir, pluginDir, relPath)
+      if (checkPermission) checkPermission('fs.read', token)
       try {
         return stripBom(await fs.readFile(abs, 'utf8'))
       } catch (err) {
@@ -28,9 +46,9 @@ export function createFsUtils(dir, checkPermission) {
     },
 
     async exists(relPath) {
-      if (checkPermission) checkPermission('fs.read', relPath)
-      const abs = path.resolve(dir, relPath)
-      assertInsideDir(dir, abs)
+      const token = canonicalizePath(dir, relPath)
+      const abs = resolveToAbs(dir, pluginDir, relPath)
+      if (checkPermission) checkPermission('fs.read', token)
       try {
         await fs.access(abs)
         return true
@@ -40,6 +58,9 @@ export function createFsUtils(dir, checkPermission) {
     },
 
     async glob(pattern, { ignore = [], onlyDirectories = false } = {}) {
+      if (path.isAbsolute(pattern)) {
+        throw new Error('utils.fs.glob does not support absolute patterns — use a relative pattern.')
+      }
       if (checkPermission) checkPermission('fs.glob', pattern)
       const results = await glob(pattern, {
         cwd: dir,

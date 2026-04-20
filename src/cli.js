@@ -9,37 +9,13 @@ if (majorVersion >= 20 && !process.execArgv.includes('--no-node-snapshot')) {
 }
 import { Command } from 'commander'
 import { configure as configureOutput } from './utils/output.js'
-import { handler as useHandler } from './commands/use.js'
-import { handler as listHandler } from './commands/list.js'
-import { handler as initHandler } from './commands/init.js'
-import { handler as createHandler } from './commands/create.js'
-import { handler as pluginInstallHandler } from './commands/plugin/install.js'
-import { handler as pluginUninstallHandler } from './commands/plugin/uninstall.js'
-import { handler as pluginListHandler } from './commands/plugin/list.js'
-import { handler as pluginUpdateHandler } from './commands/plugin/update.js'
-import { handler as pluginEnableHandler } from './commands/plugin/enable.js'
-import { handler as pluginDisableHandler } from './commands/plugin/disable.js'
-import { handler as pluginCreateHandler } from './commands/plugin/create.js'
-import { handler as marketplaceAddHandler } from './commands/marketplace/add.js'
-import { handler as marketplaceRemoveHandler } from './commands/marketplace/remove.js'
-import { handler as marketplaceListHandler } from './commands/marketplace/list.js'
-import { handler as marketplaceSearchHandler } from './commands/marketplace/search.js'
-import { handler as marketplaceUpdateHandler } from './commands/marketplace/update.js'
-import { handler as marketplaceBrowseHandler } from './commands/marketplace/browse.js'
-import { handler as benchmarkHandler } from './commands/benchmark.js'
-import { handler as versionHandler } from './commands/version.js'
-import { handler as doctorHandler } from './commands/doctor.js'
-import { handler as checkHandler } from './commands/check.js'
-import { handler as templateListHandler } from './commands/template/list.js'
-import { handler as templateUseHandler } from './commands/template/use.js'
-import { handler as templateCreateHandler } from './commands/template/create.js'
 
 const program = new Command()
 
 program
   .name('crunes')
   .description('CLI tool for managing context runes')
-  .version('1.3.12', '-v, --version')
+  .version('1.4.0', '-v, --version')
   .option('-y, --yes', 'assume yes to all prompts and skip interactive mode (also auto-detected in non-TTY environments)')
   .option('-p, --plain', 'plain output: no colors, no box-drawing, plain symbols — optimised for AI/pipe use')
   .option('--cwd <path>', 'project root to use instead of the current working directory')
@@ -70,8 +46,9 @@ program
   .option('-a, --and <key>', 'add another rune key to the batch (repeatable)', (val, acc) => [...acc, val], [])
   .option('--fail-fast', 'stop on first rune error (default: run all, exit 1 if any failed)')
   .action(async (key, opts) => {
+    const { handler } = await import('./commands/use.js')
     const keys = [key, ...opts.and]
-    await useHandler({ keys, format: opts.format, failFast: !!opts.failFast, projectRoot: projectRoot() })
+    await handler({ keys, format: opts.format, failFast: !!opts.failFast, projectRoot: projectRoot() })
   })
 
 program
@@ -79,21 +56,24 @@ program
   .description('Print the installed version and check for updates')
   .option('--no-check', 'skip the npm update check')
   .action(async (opts) => {
-    await versionHandler({ check: opts.check, plain: !!program.opts().plain })
+    const { handler } = await import('./commands/version.js')
+    await handler({ check: opts.check, plain: !!program.opts().plain })
   })
 
 program
   .command('doctor')
   .description('Verify environment and project setup')
   .action(async () => {
-    await doctorHandler({ projectRoot: projectRoot() })
+    const { handler } = await import('./commands/doctor.js')
+    await handler({ projectRoot: projectRoot() })
   })
 
 program
   .command('check <key>')
   .description('Run a rune and validate its output shape')
   .action(async (key) => {
-    await checkHandler({ key, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/check.js')
+    await handler({ key, projectRoot: projectRoot() })
   })
 
 program
@@ -105,7 +85,8 @@ program
   )
   .option('--runs <n>', 'number of runs to average (default: 1)', v => parseInt(v, 10), 1)
   .action(async (key, opts) => {
-    await benchmarkHandler({ key, runs: opts.runs, plain: !!program.opts().plain, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/benchmark.js')
+    await handler({ key, runs: opts.runs, plain: !!program.opts().plain, projectRoot: projectRoot() })
   })
 
 program
@@ -113,14 +94,16 @@ program
   .description('List all registered runes')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (opts) => {
-    await listHandler({ format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/list.js')
+    await handler({ format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
   })
 
 program
   .command('init')
   .description('Create .context-runes/config.json in the current project')
   .action(async () => {
-    await initHandler({ yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/init.js')
+    await handler({ yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 program
@@ -131,7 +114,8 @@ program
   .option('--name <name>', 'human-readable label shown in crunes list')
   .option('--description <description>', 'short description of what context this rune provides')
   .action(async (key, opts) => {
-    await createHandler({ key, format: opts.format, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/create.js')
+    await handler({ key, format: opts.format, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 // Plugin management commands
@@ -141,14 +125,16 @@ plugin
   .command('install <source>')
   .description('Install a plugin from a local path, GitHub repo (owner/repo), git URL, or npm package')
   .action(async (source) => {
-    await pluginInstallHandler({ source, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/install.js')
+    await handler({ source, projectRoot: projectRoot() })
   })
 
 plugin
   .command('uninstall <name>')
   .description('Uninstall an installed plugin')
   .action(async (name) => {
-    await pluginUninstallHandler({ name, yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/uninstall.js')
+    await handler({ name, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 plugin
@@ -156,28 +142,32 @@ plugin
   .description('List installed plugins')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (opts) => {
-    await pluginListHandler({ format: opts.format })
+    const { handler } = await import('./commands/plugin/list.js')
+    await handler({ format: opts.format })
   })
 
 plugin
   .command('update [name]')
   .description('Update one or all installed plugins')
   .action(async (name) => {
-    await pluginUpdateHandler({ name, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/update.js')
+    await handler({ name, projectRoot: projectRoot() })
   })
 
 plugin
   .command('enable <name>')
   .description('Add a plugin to this project\'s enabled list')
   .action(async (name) => {
-    await pluginEnableHandler({ name, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/enable.js')
+    await handler({ name, projectRoot: projectRoot() })
   })
 
 plugin
   .command('disable <name>')
   .description('Remove a plugin from this project\'s enabled list')
   .action(async (name) => {
-    await pluginDisableHandler({ name, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/disable.js')
+    await handler({ name, projectRoot: projectRoot() })
   })
 
 plugin
@@ -188,7 +178,8 @@ plugin
   .option('--license <spdx>', 'SPDX license identifier (default: MIT)')
   .option('--out <path>', 'output directory (default: ./<name>)')
   .action(async (name, opts) => {
-    await pluginCreateHandler({ name, description: opts.description, author: opts.author, license: opts.license, out: opts.out, yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/plugin/create.js')
+    await handler({ name, description: opts.description, author: opts.author, license: opts.license, out: opts.out, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 // Template commands
@@ -199,7 +190,8 @@ template
   .description('List available templates. [source] can be "local" (project config only) or a plugin name; omit to list all.')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (source, opts) => {
-    await templateListHandler({ source, format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/template/list.js')
+    await handler({ source, format: opts.format, plain: !!program.opts().plain, projectRoot: projectRoot() })
   })
 
 template
@@ -215,7 +207,8 @@ template
   .option('--name <name>', 'human-readable label shown in crunes list')
   .option('--description <description>', 'short description of what context this rune provides')
   .action(async (ref, opts) => {
-    await templateUseHandler({ ref, key: opts.as, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/template/use.js')
+    await handler({ ref, key: opts.as, path: opts.path, name: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 template
@@ -225,7 +218,8 @@ template
   .option('--name <name>', 'display label shown in crunes template list (separate from the template key)')
   .option('--description <description>', 'short description of what kind of rune this template produces')
   .action(async (name, opts) => {
-    await templateCreateHandler({ name, path: opts.path, templateName: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
+    const { handler } = await import('./commands/template/create.js')
+    await handler({ name, path: opts.path, templateName: opts.name, description: opts.description, yes: !!program.opts().yes, projectRoot: projectRoot() })
   })
 
 // Marketplace commands
@@ -235,35 +229,40 @@ marketplace
   .command('add <url>')
   .description('Add a marketplace source URL')
   .action(async (url) => {
-    await marketplaceAddHandler({ url })
+    const { handler } = await import('./commands/marketplace/add.js')
+    await handler({ url })
   })
 
 marketplace
   .command('remove <url>')
   .description('Remove a marketplace source URL')
   .action(async (url) => {
-    await marketplaceRemoveHandler({ url })
+    const { handler } = await import('./commands/marketplace/remove.js')
+    await handler({ url })
   })
 
 marketplace
   .command('list')
   .description('List configured marketplace sources')
   .action(async () => {
-    await marketplaceListHandler()
+    const { handler } = await import('./commands/marketplace/list.js')
+    await handler()
   })
 
 marketplace
   .command('search <query>')
   .description('Search for plugins across configured marketplace sources')
   .action(async (query) => {
-    await marketplaceSearchHandler({ query })
+    const { handler } = await import('./commands/marketplace/search.js')
+    await handler({ query })
   })
 
 marketplace
   .command('update [url]')
   .description('Refresh cached marketplace data (all sources if no URL given)')
   .action(async (url) => {
-    await marketplaceUpdateHandler({ url })
+    const { handler } = await import('./commands/marketplace/update.js')
+    await handler({ url })
   })
 
 marketplace
@@ -271,7 +270,59 @@ marketplace
   .description('List all plugins from all configured marketplace sources')
   .option('--format <format>', 'output format: md (default) or json', 'md')
   .action(async (opts) => {
-    await marketplaceBrowseHandler({ format: opts.format })
+    const { handler } = await import('./commands/marketplace/browse.js')
+    await handler({ format: opts.format })
+  })
+
+// Completions
+const completions = program.command('completions').description('Manage shell tab-completions')
+
+completions
+  .command('bash [args...]')
+  .description('Bash completion handler — called by the installed hook at tab-press time.')
+  .action(async () => {
+    const { bashHandler } = await import('./commands/completions.js')
+    bashHandler()
+  })
+
+completions
+  .command('zsh [words...]')
+  .description('Zsh completion handler — called by the installed hook at tab-press time.')
+  .action(async (words) => {
+    const { zshHandler } = await import('./commands/completions.js')
+    zshHandler(['crunes', ...words])
+  })
+
+completions
+  .command('fish [words...]')
+  .description('Fish completion handler — called by the installed hook at tab-press time.')
+  .action(async (words) => {
+    const { fishHandler } = await import('./commands/completions.js')
+    fishHandler(['crunes', ...words])
+  })
+
+completions
+  .command('powershell [elements...]')
+  .description('PowerShell completion handler — called by the installed hook at tab-press time.')
+  .action(async (elements) => {
+    const { powershellHandler } = await import('./commands/completions.js')
+    powershellHandler(['crunes', ...elements])
+  })
+
+completions
+  .command('install <shell>')
+  .description(
+    'Append the completion hook for <shell> to your shell profile (idempotent).\n' +
+    '  Supported: bash, zsh, fish, powershell\n' +
+    '  Examples:\n' +
+    '    crunes completions install bash        # appends to ~/.bashrc\n' +
+    '    crunes completions install zsh         # appends to ~/.zshrc\n' +
+    '    crunes completions install fish        # appends to ~/.config/fish/config.fish\n' +
+    '    crunes completions install powershell  # appends to PowerShell $PROFILE'
+  )
+  .action(async (shell) => {
+    const { installHandler } = await import('./commands/completions.js')
+    await installHandler(shell)
   })
 
 process.on('uncaughtException', (err) => {
