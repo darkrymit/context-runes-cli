@@ -9,6 +9,24 @@ export class PermissionError extends Error {
   }
 }
 
+function normalizePermission(perm) {
+  if (perm.startsWith('fs.read:') || perm.startsWith('fs.exists:') || perm.startsWith('fs.glob:')) {
+    const [cap, ...rest] = perm.split(':')
+    const val = rest.join(':')
+    if (
+      !val.startsWith('./') &&
+      !val.startsWith('../') &&
+      !val.startsWith('@plugin/') &&
+      !val.startsWith('~/') &&
+      !val.startsWith('/') &&
+      !/^[a-zA-Z]:/.test(val) // Windows absolute path
+    ) {
+      return `${cap}:./${val}`
+    }
+  }
+  return perm
+}
+
 /**
  * Compute effective allow/deny from plugin.json permissions + optional project override.
  *
@@ -16,11 +34,11 @@ export class PermissionError extends Error {
  * deny  combines  — project deny merges with plugin deny; a denial at any level is permanent.
  */
 export function computeEffectivePermissions(pluginPerms, projectPerms) {
-  const pluginAllow = pluginPerms?.allow ?? []
-  const pluginDeny  = pluginPerms?.deny ?? []
+  const pluginAllow = (pluginPerms?.allow ?? []).map(normalizePermission)
+  const pluginDeny  = (pluginPerms?.deny ?? []).map(normalizePermission)
   return {
-    allow: projectPerms?.allow ?? pluginAllow,
-    deny:  [...pluginDeny, ...(projectPerms?.deny ?? [])],
+    allow: (projectPerms?.allow ?? pluginAllow).map(normalizePermission),
+    deny:  [...pluginDeny, ...(projectPerms?.deny ?? []).map(normalizePermission)],
   }
 }
 
