@@ -60,18 +60,14 @@ describe('makePermissionChecker', () => {
     expect(() => check('fs.read', '/etc/passwd')).toThrow(PermissionError)
   })
 
-  it('PermissionError carries capability and value', () => {
+  it('PermissionError carries capability, value, and message', () => {
     const check = makePermissionChecker({ allow: [], deny: [] })
     let err
     try { check('shell', 'rm -rf') } catch (e) { err = e }
     expect(err).toBeInstanceOf(PermissionError)
     expect(err.capability).toBe('shell')
     expect(err.value).toBe('rm -rf')
-  })
-
-  it('PermissionError message includes capability:value', () => {
-    const check = makePermissionChecker({ allow: [], deny: [] })
-    expect(() => check('fs.read', 'secret.txt')).toThrow("'fs.read:secret.txt' is not permitted.")
+    expect(err.message).toContain("'shell:rm -rf' is not permitted.")
   })
 
   it('wildcard allow passes any matching path', () => {

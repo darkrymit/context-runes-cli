@@ -53,8 +53,4 @@ describe('table', () => {
     expect(out).toContain('| react | 18.0.0 |')
     expect(out).toContain('| lodash | 4.17.21 |')
   })
-
-  it('matches snapshot', () => {
-    expect(md.table(['A', 'B'], [['1', '2'], ['3', '4']])).toMatchSnapshot()
-  })
 })

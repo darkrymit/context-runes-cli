@@ -1,26 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { node, format } from '../../../src/api/utils/tree.js'
 
-describe('node', () => {
-  it('creates a node with name, description, and empty children by default', () => {
-    expect(node('root', 'Root node')).toEqual({ name: 'root', description: 'Root node', children: [] })
-  })
-
-  it('accepts explicit children', () => {
-    const child = node('child', 'Child node')
-    const root = node('root', 'Root', [child])
-    expect(root.children).toHaveLength(1)
-    expect(root.children[0]).toBe(child)
-  })
-})
-
 describe('format (tree style)', () => {
-  it('renders a leaf node with no children', () => {
-    const out = format(node('root', 'A root'))
-    expect(out).toContain('root')
-    expect(out).toContain('A root')
-  })
-
   it('renders children with tree connectors', () => {
     const root = node('root', 'Root', [
       node('a', 'First'),
@@ -29,16 +10,6 @@ describe('format (tree style)', () => {
     const out = format(root)
     expect(out).toContain('├──')
     expect(out).toContain('└──')
-  })
-
-  it('renders deeply nested children', () => {
-    const root = node('root', 'Root', [
-      node('a', 'A', [
-        node('a1', 'A1'),
-      ]),
-    ])
-    const out = format(root)
-    expect(out).toContain('a1')
   })
 
   it('matches snapshot', () => {

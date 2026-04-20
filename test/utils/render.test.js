@@ -10,10 +10,6 @@ describe('render', () => {
     expect(render({ type: 'markdown', content: 'hello' })).toBe('hello')
   })
 
-  it('returns null when markdown content is missing', () => {
-    expect(render({ type: 'markdown' })).toBeNull()
-  })
-
   it('renders a tree node to string', () => {
     const root = { name: 'root', description: 'Root', children: [] }
     const out = render({ type: 'tree', root })

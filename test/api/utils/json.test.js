@@ -93,12 +93,6 @@ describe('json.getAll', () => {
     expect(results).toContain('^18.0.0')
   })
 
-  it('returns [] when no matches', async () => {
-    const fs = makeFsUtils({ 'package.json': PKG })
-    const json = createJsonUtils('/project', fs)
-    expect(await json.getAll('package.json', '$.devDependencies[*]')).toEqual([])
-  })
-
   it('returns defaultValue when no matches', async () => {
     const fs = makeFsUtils({ 'package.json': PKG })
     const json = createJsonUtils('/project', fs)

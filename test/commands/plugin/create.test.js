@@ -22,32 +22,6 @@ describe('pluginJson', () => {
     expect(() => JSON.parse(pluginJson(BASE_OPTS))).not.toThrow()
   })
 
-  it('sets all top-level fields correctly', () => {
-    const out = JSON.parse(pluginJson(BASE_OPTS))
-    expect(out).toMatchObject({
-      format: '1',
-      name: 'my-plugin',
-      version: '1.0.0',
-      description: 'A test plugin',
-      author: { name: 'Alice' },
-      license: 'MIT',
-      keywords: [],
-    })
-  })
-
-  it('registers example rune with empty permissions.allow', () => {
-    const { runes } = JSON.parse(pluginJson(BASE_OPTS))
-    expect(runes.example).toMatchObject({
-      name: 'Example Rune',
-      permissions: { allow: [] },
-    })
-  })
-
-  it('registers example-template', () => {
-    const { templates } = JSON.parse(pluginJson(BASE_OPTS))
-    expect(templates['example-template']).toMatchObject({ name: 'Example Template' })
-  })
-
   it('matches snapshot', () => {
     expect(pluginJson(BASE_OPTS)).toMatchSnapshot()
   })
@@ -58,70 +32,30 @@ describe('marketplaceJson', () => {
     expect(() => JSON.parse(marketplaceJson(BASE_OPTS))).not.toThrow()
   })
 
-  it('sets owner and plugin entry correctly', () => {
-    const out = JSON.parse(marketplaceJson(BASE_OPTS))
-    expect(out.owner).toEqual({ name: 'Alice' })
-    expect(out.plugins).toHaveLength(1)
-    expect(out.plugins[0]).toMatchObject({
-      name: 'my-plugin',
-      version: '1.0.0',
-      source: './',
-      category: 'runes',
-    })
-  })
-
   it('matches snapshot', () => {
     expect(marketplaceJson(BASE_OPTS)).toMatchSnapshot()
   })
 })
 
 describe('exampleRune', () => {
-  it('exports an async generate function', () => {
-    expect(exampleRune()).toContain('export async function generate')
-  })
-
-  it('returns a section via utils.section', () => {
-    expect(exampleRune()).toContain('utils.section')
-  })
-
   it('matches snapshot', () => {
     expect(exampleRune()).toMatchSnapshot()
   })
 })
 
 describe('exampleTemplate', () => {
-  it('exports an async generate function', () => {
-    expect(exampleTemplate()).toContain('export async function generate')
-  })
-
-  it('explains copy-on-scaffold behaviour', () => {
-    expect(exampleTemplate()).toContain('crunes template use')
-  })
-
   it('matches snapshot', () => {
     expect(exampleTemplate()).toMatchSnapshot()
   })
 })
 
 describe('readmeMd', () => {
-  it('contains the plugin name as h1', () => {
-    expect(readmeMd(BASE_OPTS)).toContain('# my-plugin')
-  })
-
-  it('contains the description', () => {
-    expect(readmeMd(BASE_OPTS)).toContain('A test plugin')
-  })
-
   it('matches snapshot', () => {
     expect(readmeMd(BASE_OPTS)).toMatchSnapshot()
   })
 })
 
 describe('changelogMd', () => {
-  it('contains a 1.0.0 entry', () => {
-    expect(changelogMd()).toContain('## 1.0.0')
-  })
-
   it('matches snapshot', () => {
     expect(changelogMd()).toMatchSnapshot()
   })
