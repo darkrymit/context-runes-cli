@@ -1,4 +1,5 @@
 import micromatch from 'micromatch'
+import { matchFetchPermission } from './permissions-http.js'
 
 export class PermissionError extends Error {
   constructor(capability, value) {
@@ -48,7 +49,13 @@ export function computeEffectivePermissions(pluginPerms, projectPerms) {
  */
 export function makePermissionChecker(effective) {
   return function checkPermission(capability, value) {
-    const token = `${capability}:${value}`
+    if (capability === 'fetch') {
+      const allowed = effective.allow.some(p => matchFetchPermission(value, p))
+      const denied  = effective.deny.length > 0 && effective.deny.some(p => matchFetchPermission(value, p))
+      if (!allowed || denied) throw new PermissionError(capability, value)
+      return
+    }
+    const token   = `${capability}:${value}`
     const allowed = micromatch.isMatch(token, effective.allow)
     const denied  = effective.deny.length > 0 && micromatch.isMatch(token, effective.deny)
     if (!allowed || denied) throw new PermissionError(capability, value)
