@@ -3,6 +3,7 @@ import * as treeUtils from './tree.js'
 import { createFsUtils } from './fs.js'
 import { createShellUtils } from './shell.js'
 import { createJsonUtils } from './json.js'
+import { createFetchUtils } from './fetch.js'
 
 function section(name, data, { title, attrs } = {}) {
   return { name, title, attrs: attrs ?? {}, data }
@@ -21,6 +22,7 @@ export function createUtils(dir, checkPermission = null, pluginDir = null) {
     section,
     fs,
     shell: createShellUtils(dir, checkPermission),
-    json: createJsonUtils(dir, fs),
+    json:  createJsonUtils(dir, fs),
+    fetch: createFetchUtils(checkPermission),
   }
 }
