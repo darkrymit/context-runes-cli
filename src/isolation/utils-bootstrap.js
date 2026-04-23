@@ -24,6 +24,19 @@ globalThis.utils = {
     get:    (p, q, d) => $__utils_json_get.apply(undefined, [p, q, d !== undefined ? JSON.stringify(d) : undefined], { result: { promise: true } }).then(JSON.parse),
     getAll: (p, q, d) => $__utils_json_getAll.apply(undefined, [p, q, d !== undefined ? JSON.stringify(d) : undefined], { result: { promise: true } }).then(JSON.parse),
   },
+  fetch: (url, opts) => $__utils_fetch
+    .apply(undefined, [url, opts ? JSON.stringify(opts) : undefined], { result: { promise: true } })
+    .then(raw => {
+      const res = JSON.parse(raw)
+      return {
+        ok:         res.ok,
+        status:     res.status,
+        statusText: res.statusText,
+        headers:    res.headers,
+        text:       () => Promise.resolve(res._text),
+        json:       () => Promise.resolve(JSON.parse(res._text)),
+      }
+    }),
   md,
   tree,
 }

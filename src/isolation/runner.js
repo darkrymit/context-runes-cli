@@ -58,6 +58,16 @@ async function injectUtils(isolate, context, utils, runeCallback) {
     const result = await utils.json.getAll(relPath, jsonPath, defaultJson !== undefined ? JSON.parse(defaultJson) : undefined)
     return JSON.stringify(result)
   }))
+  await jail.set('$__utils_fetch', new ivm.Reference(async (url, optsJson) => {
+    const res = await utils.fetch(url, optsJson ? JSON.parse(optsJson) : undefined)
+    return JSON.stringify({
+      ok:         res.ok,
+      status:     res.status,
+      statusText: res.statusText,
+      headers:    res.headers,
+      _text:      await res.text(),
+    })
+  }))
 
   const [mdMod, treeMod, utilsMod] = await Promise.all([
     compileStaticModule(isolate, 'md'),
