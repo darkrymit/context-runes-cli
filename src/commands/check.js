@@ -1,5 +1,13 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { loadConfig, runRune } from '../core.js'
 import { output } from '../utils/output.js'
+
+const GATED_UTILS = ['utils.fs', 'utils.shell', 'utils.fetch']
+
+export function scanPermissionWarnings(runeSource) {
+  return GATED_UTILS.filter(u => runeSource.includes(u))
+}
 
 const KEBAB_RE = /^[a-z0-9-]+$/
 
@@ -64,6 +72,15 @@ export async function handler({ key, projectRoot = process.cwd() } = {}) {
   } catch (err) {
     output.error(`Config unreadable: ${err.message}`)
     process.exit(1)
+  }
+
+  const entry = config.runes?.[key]
+  if (entry?.path && !(entry.permissions?.allow?.length)) {
+    let src = ''
+    try { src = readFileSync(join(projectRoot, entry.path), 'utf8') } catch { /* skip unreadable */ }
+    for (const util of scanPermissionWarnings(src)) {
+      output.warn(`${key} — permissions.allow is empty but rune uses ${util}`)
+    }
   }
 
   let sections
