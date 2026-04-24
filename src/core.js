@@ -134,10 +134,11 @@ export async function runRune(dir, config, key, args, opts = {}, _callStack = []
   const pluginMatch = localOnly ? null : await resolvePluginRune(config, key)
   if (pluginMatch) {
     const { pluginKey, runeKey, pluginDir } = pluginMatch
-    const pluginJson = await loadPluginJson(pluginDir)
+    const pluginJson   = await loadPluginJson(pluginDir)
     const projectPerms = config.permissions?.[`${pluginKey}:${runeKey}`]
+    const projectVars  = config.vars?.[`${pluginKey}:${runeKey}`] ?? {}
     const result = await executePluginRune({
-      pluginDir, runeKey, pluginJson, projectPerms, args,
+      pluginDir, runeKey, pluginJson, projectPerms, projectVars, args,
       projectDir: dir, opts: config, runeCallback,
       sections: opts.sections ?? null,
     })
@@ -152,8 +153,9 @@ export async function runRune(dir, config, key, args, opts = {}, _callStack = []
     if (autoMatch) {
       const { pluginKey, runeKey, pluginDir, pluginJson } = autoMatch
       const projectPerms = config.permissions?.[`${pluginKey}:${runeKey}`]
+      const projectVars  = config.vars?.[`${pluginKey}:${runeKey}`] ?? {}
       const result = await executePluginRune({
-        pluginDir, runeKey, pluginJson, projectPerms, args,
+        pluginDir, runeKey, pluginJson, projectPerms, projectVars, args,
         projectDir: dir, opts: config, runeCallback,
         sections: opts.sections ?? null,
       })
@@ -169,10 +171,11 @@ export async function runRune(dir, config, key, args, opts = {}, _callStack = []
     const aliasMatch = await resolvePluginRune(config, entry.plugin)
     if (!aliasMatch) throw new Error(`Plugin alias "${key}" → "${entry.plugin}" is not enabled or installed.`)
     const { pluginKey, runeKey, pluginDir } = aliasMatch
-    const pluginJson = await loadPluginJson(pluginDir)
+    const pluginJson   = await loadPluginJson(pluginDir)
     const projectPerms = entry.permissions ?? config.permissions?.[`${pluginKey}:${runeKey}`]
+    const projectVars  = entry.vars ?? config.vars?.[`${pluginKey}:${runeKey}`] ?? {}
     const result = await executePluginRune({
-      pluginDir, runeKey, pluginJson, projectPerms, args,
+      pluginDir, runeKey, pluginJson, projectPerms, projectVars, args,
       projectDir: dir, opts: config, runeCallback,
       sections: opts.sections ?? null,
     })
@@ -186,6 +189,7 @@ export async function runRune(dir, config, key, args, opts = {}, _callStack = []
   const result = await runRuneInIsolate(fullPath, effective, args, dir, {
     runeCallback,
     sections: opts.sections ?? null,
+    vars: entry.vars ?? {},
   })
   return normaliseResult(result)
 }
