@@ -4,17 +4,13 @@ import { createFsUtils } from './fs.js'
 import { createShellUtils } from './shell.js'
 import { createJsonUtils } from './json.js'
 import { createFetchUtils } from './fetch.js'
+import { createEnvUtils } from './env.js'
 
 function section(name, data, { title, attrs } = {}) {
   return { name, title, attrs: attrs ?? {}, data }
 }
 
-/**
- * @param {string} dir - project root directory (cwd for rune)
- * @param {Function|null} checkPermission - permission checker; null = local rune (ungated)
- * @param {string|null} pluginDir - plugin root dir; enables @plugin/ paths
- */
-export function createUtils(dir, checkPermission = null, pluginDir = null) {
+export function createUtils(dir, checkPermission = null, pluginDir = null, permissions = { allow: [], deny: [] }) {
   const fs = createFsUtils(dir, checkPermission, pluginDir)
   return {
     md,
@@ -24,5 +20,6 @@ export function createUtils(dir, checkPermission = null, pluginDir = null) {
     shell: createShellUtils(dir, checkPermission),
     json:  createJsonUtils(dir, fs),
     fetch: createFetchUtils(checkPermission),
+    env:   createEnvUtils(dir, checkPermission, permissions),
   }
 }

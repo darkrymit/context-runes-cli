@@ -68,6 +68,13 @@ async function injectUtils(isolate, context, utils, runeCallback) {
       _text:      await res.text(),
     })
   }))
+  await jail.set('$__utils_env_get', new ivm.Reference(async (key, fallbackJson) => {
+    const result = utils.env.get(key, fallbackJson !== undefined ? JSON.parse(fallbackJson) : undefined)
+    return result !== undefined ? result : null
+  }))
+  await jail.set('$__utils_env_has', new ivm.Reference(async (key) => {
+    return utils.env.has(key)
+  }))
 
   const [mdMod, treeMod, utilsMod] = await Promise.all([
     compileStaticModule(isolate, 'md'),
@@ -124,7 +131,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     ? { allow: [...effective.allow, 'fs.read:@plugin/**'], deny: effective.deny }
     : effective
   const checkPermission = makePermissionChecker(augmented)
-  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null)
+  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null, augmented)
 
   if (isVerbose) console.error(`[crunes:debug] creating Isolate...`)
   const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })

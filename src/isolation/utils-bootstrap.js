@@ -37,6 +37,13 @@ globalThis.utils = {
         json:       () => Promise.resolve(JSON.parse(res._text)),
       }
     }),
+  env: {
+    get: (key, fallback) => $__utils_env_get
+      .apply(undefined, [key, fallback !== undefined ? JSON.stringify(fallback) : undefined], { result: { promise: true } })
+      .then(r => r !== null ? r : fallback),
+    has: (key) => $__utils_env_has
+      .apply(undefined, [key], { result: { promise: true } }),
+  },
   md,
   tree,
 }
