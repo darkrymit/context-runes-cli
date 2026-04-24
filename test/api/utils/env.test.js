@@ -20,7 +20,7 @@ describe('createEnvUtils', () => {
     delete process.env.MY_TOKEN
   })
 
-  it('get returns value from .env file when permitted and not in process', () => {
+  it('get returns value from .env file when permitted', () => {
     readFileSync.mockReturnValue('DB_URL=postgres://localhost')
     parse.mockReturnValue({ DB_URL: 'postgres://localhost' })
     const utils = createEnvUtils(dir, null, { allow: ['env:.env:DB_URL'], deny: [] })
@@ -28,25 +28,7 @@ describe('createEnvUtils', () => {
     expect(readFileSync).toHaveBeenCalledWith('/project/.env', 'utf8')
   })
 
-  it('source order in permission drives priority — process beats .env when listed first', () => {
-    process.env.API_KEY = 'from-process'
-    readFileSync.mockReturnValue('')
-    parse.mockReturnValue({ API_KEY: 'from-file' })
-    const utils = createEnvUtils(dir, null, { allow: ['env:process,.env:API_KEY'], deny: [] })
-    expect(utils.get('API_KEY')).toBe('from-process')
-    delete process.env.API_KEY
-  })
-
-  it('.env beats process when .env is listed first', () => {
-    process.env.API_KEY = 'from-process'
-    readFileSync.mockReturnValue('')
-    parse.mockReturnValue({ API_KEY: 'from-file' })
-    const utils = createEnvUtils(dir, null, { allow: ['env:.env,process:API_KEY'], deny: [] })
-    expect(utils.get('API_KEY')).toBe('from-file')
-    delete process.env.API_KEY
-  })
-
-  it('multi-entry is equivalent to comma-separated', () => {
+  it('multi-entry allow drives source order — process entry first wins', () => {
     process.env.API_KEY = 'from-process'
     readFileSync.mockReturnValue('')
     parse.mockReturnValue({ API_KEY: 'from-file' })
@@ -55,6 +37,18 @@ describe('createEnvUtils', () => {
       deny: [],
     })
     expect(utils.get('API_KEY')).toBe('from-process')
+    delete process.env.API_KEY
+  })
+
+  it('multi-entry allow drives source order — .env entry first wins', () => {
+    process.env.API_KEY = 'from-process'
+    readFileSync.mockReturnValue('')
+    parse.mockReturnValue({ API_KEY: 'from-file' })
+    const utils = createEnvUtils(dir, null, {
+      allow: ['env:.env:API_KEY', 'env:process:API_KEY'],
+      deny: [],
+    })
+    expect(utils.get('API_KEY')).toBe('from-file')
     delete process.env.API_KEY
   })
 

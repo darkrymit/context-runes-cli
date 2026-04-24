@@ -17,17 +17,15 @@ export function createEnvUtils(dir, checkPermission, permissions) {
   function resolve(key) {
     for (const pattern of permissions.allow) {
       if (!pattern.startsWith('env:')) continue
-      const { sources, keyPattern } = parseEnvPattern(pattern)
+      const { source, keyPattern } = parseEnvPattern(pattern)
       if (!micromatch.isMatch(key, keyPattern)) continue
-      for (const src of sources) {
-        try {
-          if (checkPermission) checkPermission('env', `${src}:${key}`)
-        } catch {
-          continue
-        }
-        const data = src === 'process' ? process.env : loadFile(dir, src, fileCache)
-        if (Object.hasOwn(data, key)) return data[key]
+      try {
+        if (checkPermission) checkPermission('env', `${source}:${key}`)
+      } catch {
+        continue
       }
+      const data = source === 'process' ? process.env : loadFile(dir, source, fileCache)
+      if (Object.hasOwn(data, key)) return data[key]
     }
     return undefined
   }
