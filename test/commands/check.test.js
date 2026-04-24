@@ -21,6 +21,10 @@ describe('scanPermissionWarnings', () => {
     expect(scanPermissionWarnings('const res = await utils.fetch("https://api.example.com")')).toContain('utils.fetch')
   })
 
+  it('detects utils.env usage', () => {
+    expect(scanPermissionWarnings('const token = await utils.env.get("MY_TOKEN")')).toContain('utils.env')
+  })
+
   it('detects multiple gated utils in same source', () => {
     const src = 'await utils.fs.read("x"); await utils.fetch("http://example.com")'
     const warnings = scanPermissionWarnings(src)

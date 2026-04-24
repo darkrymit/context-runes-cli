@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { loadConfig, runRune } from '../core.js'
 import { output } from '../utils/output.js'
 
-const GATED_UTILS = ['utils.fs', 'utils.shell', 'utils.fetch']
+const GATED_UTILS = ['utils.fs', 'utils.shell', 'utils.fetch', 'utils.env']
 
 export function scanPermissionWarnings(runeSource) {
   return GATED_UTILS.filter(u => runeSource.includes(u))
