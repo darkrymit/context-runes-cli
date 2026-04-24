@@ -5,6 +5,8 @@
 import * as md from 'crunes:md'
 import * as tree from 'crunes:tree'
 
+const __vars = JSON.parse($__vars)
+
 globalThis.utils = {
   fs: {
     read:   (p, o) => $__utils_fs_read.apply(undefined, [p, o ? JSON.stringify(o) : undefined], { result: { promise: true } }),
@@ -43,6 +45,10 @@ globalThis.utils = {
       .then(r => r !== null ? r : fallback),
     has: (key) => $__utils_env_has
       .apply(undefined, [key], { result: { promise: true } }),
+  },
+  vars: {
+    get: (key, fallback = undefined) => Object.hasOwn(__vars, key) ? __vars[key] : fallback,
+    has: (key) => Object.hasOwn(__vars, key),
   },
   md,
   tree,

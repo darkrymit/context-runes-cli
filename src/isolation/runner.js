@@ -21,7 +21,7 @@ async function compileStaticModule(isolate, key) {
  * utils-bootstrap.js imports them and wires globalThis.utils.
  * All modules come from real files on disk — no eval, no embedded code strings.
  */
-async function injectUtils(isolate, context, utils, runeCallback) {
+async function injectUtils(isolate, context, utils, runeCallback, vars) {
   const jail = context.global
 
   await jail.set('$__utils_fs_read', new ivm.Reference(async (relPath, opts) => {
@@ -75,6 +75,7 @@ async function injectUtils(isolate, context, utils, runeCallback) {
   await jail.set('$__utils_env_has', new ivm.Reference(async (key) => {
     return utils.env.has(key)
   }))
+  await jail.set('$__vars', JSON.stringify(vars))
 
   const [mdMod, treeMod, utilsMod] = await Promise.all([
     compileStaticModule(isolate, 'md'),
@@ -126,12 +127,13 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
   isolateMemoryMb = 128,
   isolateTimeoutMs = 30_000,
   sections = null,
+  vars = {},
 } = {}) {
   const augmented = pluginDir
     ? { allow: [...effective.allow, 'fs.read:@plugin/**'], deny: effective.deny }
     : effective
   const checkPermission = makePermissionChecker(augmented)
-  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null, augmented)
+  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null, augmented, vars)
 
   if (isVerbose) console.error(`[crunes:debug] creating Isolate...`)
   const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })
@@ -143,7 +145,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     await context.global.set('$__hostRequire', new ivm.Reference((spec) => hostRequire(spec)))
 
     if (isVerbose) console.error(`[crunes:debug] injecting utils and console...`)
-    await injectUtils(isolate, context, utils, runeCallback)
+    await injectUtils(isolate, context, utils, runeCallback, vars)
     await injectConsole(isolate, context)
 
     if (pluginDir != null) {
@@ -224,18 +226,22 @@ export async function runPluginRune(pluginDir, runeKey, pluginJson, effective, a
     isolateMemoryMb:  opts.isolateMemoryMb,
     isolateTimeoutMs: opts.isolateTimeoutMs,
     sections:         opts.sections ?? null,
+    vars:             opts.vars ?? {},
   })
 }
 
 /**
  * Compute effective permissions and run a plugin rune. Convenience wrapper for core.js.
  */
-export async function executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, args, projectDir, opts, runeCallback, sections }) {
-  const runePerms = pluginJson.runes[runeKey]?.permissions ?? {}
-  const effective = computeEffectivePermissions(runePerms, projectPerms)
+export async function executePluginRune({ pluginDir, runeKey, pluginJson, projectPerms, projectVars = {}, args, projectDir, opts, runeCallback, sections }) {
+  const runePerms     = pluginJson.runes[runeKey]?.permissions ?? {}
+  const effective     = computeEffectivePermissions(runePerms, projectPerms)
+  const runeVars      = pluginJson.runes[runeKey]?.vars ?? {}
+  const effectiveVars = { ...runeVars, ...projectVars }
   return runPluginRune(pluginDir, runeKey, pluginJson, effective, args, projectDir, {
     ...opts,
     runeCallback,
     sections,
+    vars: effectiveVars,
   })
 }
