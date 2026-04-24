@@ -1,5 +1,6 @@
 import micromatch from 'micromatch'
 import { matchFetchPermission } from './permissions-http.js'
+import { matchEnvPermission } from './permissions-env.js'
 
 export class PermissionError extends Error {
   constructor(capability, value) {
@@ -52,6 +53,12 @@ export function makePermissionChecker(effective) {
     if (capability === 'fetch') {
       const allowed = effective.allow.some(p => matchFetchPermission(value, p))
       const denied  = effective.deny.length > 0 && effective.deny.some(p => matchFetchPermission(value, p))
+      if (!allowed || denied) throw new PermissionError(capability, value)
+      return
+    }
+    if (capability === 'env') {
+      const allowed = effective.allow.some(p => matchEnvPermission(value, p))
+      const denied  = effective.deny.length > 0 && effective.deny.some(p => matchEnvPermission(value, p))
       if (!allowed || denied) throw new PermissionError(capability, value)
       return
     }
