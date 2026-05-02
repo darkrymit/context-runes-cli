@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.5] - 2026-05-02
 
+### Fixed
+- Fixed update check URL and install instruction still pointing to `@darkrymit/context-runes`.
+- Fixed `User-Agent` header in marketplace and install HTTP calls still using `context-runes-cli`.
+- Fixed remaining `[context-runes]` log prefixes in the ACI hook wrapper.
+- Fixed all interactive `intro()` prompts still displaying `context-runes` to users.
+- Fixed `.crunes/config.json` rune path still referencing the old `.context-runes/` prefix.
+
+### Changed
+- Publish workflow: tag pattern narrowed to semver-only, `workflow_dispatch` added for manual triggering, concurrency guard added.
+
+---
+
+## [0.4.4] - 2026-05-02
+
 ### Changed
 - Migrated package identity from `@darkrymit/context-runes` to `@darkrymit/crunes`.
 - Project config folder renamed from `.context-runes/` to `.crunes/`.
