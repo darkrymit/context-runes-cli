@@ -78,7 +78,7 @@ export async function generate(dir, args, utils, opts) {
 }
 
 export function readmeMd({ name, description }) {
-  return `# ${name}\n\n${description}\n\n## Installation\n\nAdd this plugin via the context-runes marketplace.\n`
+  return `# ${name}\n\n${description}\n\n## Installation\n\nAdd this plugin via the crunes marketplace.\n`
 }
 
 export function changelogMd() {
@@ -107,7 +107,7 @@ export async function handler({
     author = author ?? getGitAuthor()
     license = license ?? 'MIT'
   } else {
-    intro('context-runes plugin create')
+    intro('crunes plugin create')
 
     if (!name) {
       const r = await text({ message: 'Plugin name?', validate: v => v ? undefined : 'Required' })

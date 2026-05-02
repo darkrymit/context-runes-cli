@@ -32,7 +32,7 @@ function classifySource(source) {
 async function downloadGitHub(repoUrl, destDir) {
   // Download default branch tarball from GitHub API
   const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/') + '/tarball'
-  const res = await fetch(apiUrl, { headers: { 'User-Agent': 'context-runes-cli' } })
+  const res = await fetch(apiUrl, { headers: { 'User-Agent': 'crunes-cli' } })
   if (!res.ok) throw new Error(`Failed to download ${repoUrl}: HTTP ${res.status}`)
   const buf = Buffer.from(await res.arrayBuffer())
   const tarPath = path.join(destDir, 'plugin.tar.gz')

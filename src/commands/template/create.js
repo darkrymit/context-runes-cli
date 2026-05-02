@@ -36,7 +36,7 @@ export async function handler({
       process.exit(1)
     }
   } else {
-    intro('context-runes template create')
+    intro('crunes template create')
 
     if (!name) {
       const result = await text({ message: 'Template name?', validate: v => v ? undefined : 'Required' })

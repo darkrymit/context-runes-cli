@@ -54,7 +54,7 @@ export async function handler({
       process.exit(1);
     }
   } else {
-    intro('context-runes create');
+    intro('crunes create');
 
     if (!key) {
       const result = await text({ message: 'Rune key?', validate: v => v ? undefined : 'Required' });

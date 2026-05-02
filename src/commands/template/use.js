@@ -87,7 +87,7 @@ export async function handler({
   runeRelPath = runeRelPath ?? `.crunes/runes/${outputKey}.js`
   const runeAbsPath = path.join(projectRoot, runeRelPath)
 
-  if (!isNonInteractive) intro('context-runes template use')
+  if (!isNonInteractive) intro('crunes template use')
 
   // Confirm overwrite if file exists
   try {

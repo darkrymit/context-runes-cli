@@ -60,13 +60,13 @@ function isLocalPath(source) {
 async function downloadMarketplaceJson(classified) {
   if (classified.type === 'github') {
     const url = `https://raw.githubusercontent.com/${classified.resolved}/HEAD/marketplace.json`
-    const res = await fetch(url, { headers: { 'User-Agent': 'context-runes-cli' } })
+    const res = await fetch(url, { headers: { 'User-Agent': 'crunes-cli' } })
     if (!res.ok) throw new Error(`Failed to fetch marketplace from GitHub (${classified.resolved}): HTTP ${res.status}`)
     return res.json()
   }
 
   if (classified.type === 'http') {
-    const res = await fetch(classified.resolved, { headers: { 'User-Agent': 'context-runes-cli' } })
+    const res = await fetch(classified.resolved, { headers: { 'User-Agent': 'crunes-cli' } })
     if (!res.ok) throw new Error(`Failed to fetch marketplace: HTTP ${res.status}`)
     return res.json()
   }
@@ -118,7 +118,7 @@ async function fetchMarketplace(name, entry) {
   }
 
   if (classified.type === 'http') {
-    const res = await fetch(classified.resolved, { headers: { 'User-Agent': 'context-runes-cli' } })
+    const res = await fetch(classified.resolved, { headers: { 'User-Agent': 'crunes-cli' } })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     return { data: await res.json(), resolvedPath: classified.resolved }
   }

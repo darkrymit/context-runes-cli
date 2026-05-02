@@ -7,7 +7,7 @@ import { getStorePath } from '../plugins/store.js'
 const PKG_VERSION = pkg.version
 const CACHE_PATH = path.join(getStorePath(), 'update-check.json')
 const CACHE_TTL_MS = 60 * 60 * 1000
-const CHECK_URL = 'https://registry.npmjs.org/@darkrymit/context-runes/latest'
+const CHECK_URL = 'https://registry.npmjs.org/@darkrymit/crunes/latest'
 const CHECK_TIMEOUT_MS = 2000
 
 /**
@@ -85,6 +85,6 @@ export async function handler({ check = true, plain = false } = {}) {
   } else {
     console.log()
     console.log(`  ${chalk.yellow('Update available:')} ${chalk.dim(PKG_VERSION)} → ${chalk.green(latest)}`)
-    console.log(`  Run ${chalk.cyan('npm install -g @darkrymit/context-runes')} to update.`)
+    console.log(`  Run ${chalk.cyan('npm install -g @darkrymit/crunes')} to update.`)
   }
 }

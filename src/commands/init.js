@@ -20,7 +20,7 @@ export async function handler({
         process.exit(1);
       }
 
-      intro('context-runes init');
+      intro('crunes init');
       const overwrite = await confirm({
         message: 'Config already exists. Overwrite?',
         initialValue: false,

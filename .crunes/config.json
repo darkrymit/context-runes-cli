@@ -1,7 +1,7 @@
 {
   "runes": {
     "release": {
-      "path": ".context-runes/runes/release.js",
+      "path": ".crunes/runes/release.js",
       "name": "Release Info",
       "description": "Current version, branch/tag status, recent commits, changelog, and release process",
       "permissions": {
