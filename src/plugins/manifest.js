@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-const PLUGIN_JSON_RELATIVE = '.context-runes-plugin/plugin.json'
+const PLUGIN_JSON_RELATIVE = '.crunes-plugin/plugin.json'
 
 export async function loadPluginJson(pluginDir) {
   const jsonPath = path.join(pluginDir, PLUGIN_JSON_RELATIVE)

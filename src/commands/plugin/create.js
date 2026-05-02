@@ -152,8 +152,8 @@ export async function handler({
   const opts = { name, description, author, license }
 
   const files = [
-    [join(outDir, '.context-runes-plugin', 'plugin.json'), pluginJson(opts)],
-    [join(outDir, '.context-runes-plugin', 'marketplace.json'), marketplaceJson(opts)],
+    [join(outDir, '.crunes-plugin', 'plugin.json'), pluginJson(opts)],
+    [join(outDir, '.crunes-plugin', 'marketplace.json'), marketplaceJson(opts)],
     [join(outDir, 'runes', 'example.js'), exampleRune()],
     [join(outDir, 'templates', 'example-template.js'), exampleTemplate()],
     [join(outDir, 'README.md'), readmeMd(opts)],

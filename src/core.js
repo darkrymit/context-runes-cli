@@ -13,7 +13,7 @@ export class CircularRuneError extends Error {
 }
 
 export function loadConfig(dir) {
-  const configPath = join(dir, '.context-runes', 'config.json')
+  const configPath = join(dir, '.crunes', 'config.json')
   return JSON.parse(readFileSync(configPath, 'utf8'))
 }
 

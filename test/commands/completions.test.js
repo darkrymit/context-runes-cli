@@ -27,9 +27,9 @@ describe('resolveCompletions — rune key commands', () => {
 
   beforeEach(() => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'crunes-test-'))
-    fs.mkdirSync(path.join(dir, '.context-runes'), { recursive: true })
+    fs.mkdirSync(path.join(dir, '.crunes'), { recursive: true })
     fs.writeFileSync(
-      path.join(dir, '.context-runes', 'config.json'),
+      path.join(dir, '.crunes', 'config.json'),
       JSON.stringify({ runes: { release: {}, 'pkg-info': {} } }),
     )
   })
@@ -65,7 +65,7 @@ describe('resolveCompletions — plugin subcommands', () => {
   })
 
   it('returns installed plugin names for uninstall', () => {
-    const pluginsJson = path.join(os.homedir(), '.context-runes', 'plugins.json')
+    const pluginsJson = path.join(os.homedir(), '.crunes', 'plugins.json')
     const existed = fs.existsSync(pluginsJson)
     const original = existed ? fs.readFileSync(pluginsJson, 'utf8') : null
     fs.mkdirSync(path.dirname(pluginsJson), { recursive: true })
@@ -79,7 +79,7 @@ describe('resolveCompletions — plugin subcommands', () => {
   })
 
   it('returns installed plugin names for enable', () => {
-    const pluginsJson = path.join(os.homedir(), '.context-runes', 'plugins.json')
+    const pluginsJson = path.join(os.homedir(), '.crunes', 'plugins.json')
     const existed = fs.existsSync(pluginsJson)
     const original = existed ? fs.readFileSync(pluginsJson, 'utf8') : null
     fs.mkdirSync(path.dirname(pluginsJson), { recursive: true })
@@ -127,9 +127,9 @@ describe('resolveCompletions — --cwd flag', () => {
 
   beforeEach(() => {
     dir = fs.mkdtempSync(path.join(os.tmpdir(), 'crunes-test-'))
-    fs.mkdirSync(path.join(dir, '.context-runes'), { recursive: true })
+    fs.mkdirSync(path.join(dir, '.crunes'), { recursive: true })
     fs.writeFileSync(
-      path.join(dir, '.context-runes', 'config.json'),
+      path.join(dir, '.crunes', 'config.json'),
       JSON.stringify({ runes: { mykey: {} } }),
     )
   })

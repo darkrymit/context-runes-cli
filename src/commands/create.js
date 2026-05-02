@@ -75,7 +75,7 @@ export async function handler({
     }
 
     if (!runeRelPath) {
-      const defaultPath = `.context-runes/runes/${key}.js`;
+      const defaultPath = `.crunes/runes/${key}.js`;
       const result = await text({ message: 'File path?', initialValue: defaultPath });
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return; }
       runeRelPath = result;
@@ -94,14 +94,14 @@ export async function handler({
     }
   }
 
-  runeRelPath = runeRelPath ?? `.context-runes/runes/${key}.js`;
+  runeRelPath = runeRelPath ?? `.crunes/runes/${key}.js`;
   const runeAbsPath = join(projectRoot, runeRelPath);
 
   mkdirSync(dirname(runeAbsPath), { recursive: true });
   writeFileSync(runeAbsPath, template(key, format));
 
   // Register in config — write object format to support name/description
-  const configPath = join(projectRoot, '.context-runes', 'config.json');
+  const configPath = join(projectRoot, '.crunes', 'config.json');
   let config = { runes: {} };
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf8')); } catch {}

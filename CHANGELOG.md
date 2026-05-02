@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -7,21 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.3] - 2026-04-21
+## [0.4.3] - 2026-04-21
 
 ### Fixed
 - Fixed `fs.glob` permission enforcement. Glob patterns are now canonicalized (ensuring a `./` prefix for relative paths) before being checked against the permission list, resolving a regression where `fs.glob` calls were incorrectly denied when using the normalized syntax.
 
 ---
 
-## [1.4.2] - 2026-04-20
+## [0.4.2] - 2026-04-20
 
 ### Added
 - Added automatic path normalization for filesystem permissions (`fs.read`, `fs.exists`, `fs.glob`). Permission declarations can now use either bare paths (e.g., `package.json`) or prefixed paths (e.g., `./package.json`); both are automatically mapped to the internal canonical form.
 
 ---
 
-## [1.4.1] - 2026-04-20
+## [0.4.1] - 2026-04-20
 
 ### Fixed
 - Extracted CLI program factory to `src/program.js` to enable isolated testing of command definitions and completion logic.
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.0] - 2026-04-20
+## [0.4.0] - 2026-04-20
 
 ### Added
 - Added `crunes completions` command group with shell-specific handlers for bash, zsh, fish, and PowerShell.
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.12] - 2026-04-20
+## [0.3.12] - 2026-04-20
 
 ### Added
 - Added `AGENTS.md` and symlinks (`GEMINI.md`, `CLAUDE.md`) to guide AI coding assistants on project architecture and release workflows.
@@ -59,63 +59,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.11] - 2026-04-20
+## [0.3.11] - 2026-04-20
 
 ### Changed
 - Optimized test suite to focus on API contracts: removed redundant prose assertions that duplicated snapshot coverage, merged overlapping `PermissionError` tests, and dropped trivial factory-function tests with no branching logic.
 
 ---
 
-## [1.3.10] - 2026-04-19
+## [0.3.10] - 2026-04-19
 
 ### Changed
 - Internal version bump for npm sync.
 
 ---
 
-## [1.3.9] - 2026-04-17
+## [0.3.9] - 2026-04-17
 
 ### Fixed
 - Fixed `isolated-vm` segmentation faults on macOS + Node 20+ by dynamically injecting `--no-node-snapshot`.
 
 ---
 
-## [1.3.8] - 2026-04-17
+## [0.3.8] - 2026-04-17
 
 ### Added
 - Added granular trace logging inside `isolated-vm` lifecycle to pinpoint macOS segfaults.
 
 ---
 
-## [1.3.7] - 2026-04-17
+## [0.3.7] - 2026-04-17
 
 ### Added
 - Hardened error catching and added `--verbose` trace logs around execution to debug silent crashes.
 
 ---
 
-## [1.3.6] - 2026-04-17
+## [0.3.6] - 2026-04-17
 
 ### Added
 - Added `--verbose` global flag to print full stack traces on rune failures.
 
 ---
 
-## [1.3.5] - 2026-04-17
+## [0.3.5] - 2026-04-17
 
 ### Changed
 - Version bump to synchronize npm release.
 
 ---
 
-## [1.3.4] - 2026-04-17
+## [0.3.4] - 2026-04-17
 
 ### Fixed
 - Updated documentation to accurately reflect the latest CLI argument syntax, key parsing, and global flags.
 
 ---
 
-## [1.3.3] - 2026-04-17
+## [0.3.3] - 2026-04-17
 
 ### Fixed
 - Fixed a bug causing `crunes create` to output a non-standard config shape.
@@ -123,77 +123,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.3.2] - 2026-04-17
+## [0.3.2] - 2026-04-17
 
 ### Changed
 - Wrapped markdown sections in ` ```md ``` ` fenced blocks.
 
 ---
 
-## [1.3.1] - 2026-04-17
+## [0.3.1] - 2026-04-17
 
 ### Added
 - Added support for `marketplace@plugin:key` syntax in template list/use commands.
 
 ---
 
-## [1.3.0] - 2026-04-17
+## [0.3.0] - 2026-04-17
 
 ### Added
 - Introduced the `use` command, `template` group, `bench`, `version`, and auto-resolve functionality.
 
 ---
 
-## [1.2.1] - 2026-04-17
+## [0.2.1] - 2026-04-17
 
 ### Fixed
 - Fixed isolate bootstrap sources embedding via esbuild plugin.
 
 ---
 
-## [1.2.0] - 2026-04-17
+## [0.2.0] - 2026-04-17
 
 ### Changed
 - Bundled CLI with esbuild for a lean global install.
 
 ---
 
-## [1.1.0] - 2026-04-17
+## [0.1.0] - 2026-04-17
 
 ### Added
 - Introduced plugin ecosystem, rune isolation, and composition.
 
 ---
 
-## [1.0.6] - 2026-04-17
+## [0.0.6] - 2026-04-17
 
 ### Changed
 - Migrated to the `runes` naming convention.
 
 ---
 
-## [1.0.5] - 2026-04-17
+## [0.0.5] - 2026-04-17
 
 ### Changed
 - Reworked global options parsing.
 
 ---
 
-## [1.0.4] - 2026-04-17
+## [0.0.4] - 2026-04-17
 
 ### Fixed
 - Fixed proper version update logic.
 
 ---
 
-## [1.0.3] - 2026-04-17
+## [0.0.3] - 2026-04-17
 
 ### Changed
 - Removed legacy handling code.
 
 ---
 
-## [1.0.0] - 2026-04-17
+## [0.0.0] - 2026-04-17
 
 ### Added
 - Initial release.

@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 
 export function getStorePath() {
-  return path.join(os.homedir(), '.context-runes')
+  return path.join(os.homedir(), '.crunes')
 }
 
 export function getPluginCacheDir(name, version, marketplace = '_local') {

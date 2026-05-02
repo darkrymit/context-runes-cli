@@ -1,11 +1,11 @@
-# @darkrymit/context-runes
+# @darkrymit/crunes
 
-CLI tool for managing and querying context runes. Part of the [context-runes](https://github.com/darkrymit/context-runes) ecosystem.
+CLI tool for managing and querying crunes. Part of the [crunes](https://github.com/darkrymit/context-runes) ecosystem.
 
 ## Installation
 
 ```bash
-npm install -g @darkrymit/context-runes
+npm install -g @darkrymit/crunes
 ```
 
 Requires Node.js ≥ 20.
@@ -13,7 +13,7 @@ Requires Node.js ≥ 20.
 ## Commands
 
 ```
-crunes init                    Create .context-runes/config.json in the current project
+crunes init                    Create .crunes/config.json in the current project
 crunes create [key]            Scaffold a new rune and register it in config
 crunes use <key> [-a <key>...] Use one or more runes and output the result (use --fail-fast to stop on error)
 crunes bench [key]             Time rune execution and report performance (use --runs <n> to average)
@@ -70,8 +70,8 @@ crunes marketplace search <query>  Search for plugins across all sources
 
 ```bash
 cd your-project
-crunes init               # creates .context-runes/config.json
-crunes create docs        # scaffolds .context-runes/runes/docs.js
+crunes init               # creates .crunes/config.json
+crunes create docs        # scaffolds .crunes/runes/docs.js
 crunes use docs           # runs the rune and prints output
 crunes use docs -a api=v2 # runs multiple runes in batch
 ```
@@ -84,7 +84,7 @@ Commands that accept a `<key>` (like `crunes use` and `crunes bench`) support th
 
 - `name`: The name of the rune (auto-resolved from project config first, then plugins).
 - `source:`: Forces resolution from a specific source.
-  - `local:name` resolves strictly from `.context-runes/config.json`.
+  - `local:name` resolves strictly from `.crunes/config.json`.
   - `my-plugin:name` resolves strictly from an installed plugin.
 - `=arg1,arg2`: Passes arguments to the rune (available as `args` in the API).
 - `::section1,section2`: Filters the output to only return specific sections.
@@ -185,7 +185,7 @@ Throws `ShellError` (with `.stdout`, `.stderr`, `.exitCode`) on non-zero exit un
 
 ## Plugins
 
-Plugins extend context-runes with third-party runes. They run inside a V8 isolate (via `isolated-vm`) with explicit permission grants.
+Plugins extend crunes with third-party runes. They run inside a V8 isolate (via `isolated-vm`) with explicit permission grants.
 
 ### Installing a plugin
 
@@ -193,7 +193,7 @@ Plugins extend context-runes with third-party runes. They run inside a V8 isolat
 # Add a marketplace source first
 crunes marketplace add https://example.com/marketplace.json
 # or a local path for development
-crunes marketplace add ./my-plugin/.context-runes-plugin
+crunes marketplace add ./my-plugin/.crunes-plugin
 
 # Install from the marketplace
 crunes plugin install my-marketplace@my-plugin
@@ -209,7 +209,7 @@ crunes use my-plugin:some-rune
 
 ### Plugin manifest (`plugin.json`)
 
-Plugins declare their runes and permissions in `.context-runes-plugin/plugin.json`:
+Plugins declare their runes and permissions in `.crunes-plugin/plugin.json`:
 
 ```json
 {
@@ -229,7 +229,7 @@ Plugins declare their runes and permissions in `.context-runes-plugin/plugin.jso
 
 ### Project-level permission overrides
 
-Narrow or extend a plugin's permissions in `.context-runes/config.json`:
+Narrow or extend a plugin's permissions in `.crunes/config.json`:
 
 ```json
 {

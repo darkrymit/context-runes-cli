@@ -45,7 +45,7 @@ export async function handler({
     }
 
     if (!templateRelPath) {
-      const defaultPath = `.context-runes/templates/${name}.js`
+      const defaultPath = `.crunes/templates/${name}.js`
       const result = await text({ message: 'File path?', initialValue: defaultPath })
       if (result === Symbol.for('clack:cancel')) { cancel('Cancelled.'); return }
       templateRelPath = result
@@ -64,14 +64,14 @@ export async function handler({
     }
   }
 
-  templateRelPath = templateRelPath ?? `.context-runes/templates/${name}.js`
+  templateRelPath = templateRelPath ?? `.crunes/templates/${name}.js`
   const templateAbsPath = join(projectRoot, templateRelPath)
 
   mkdirSync(dirname(templateAbsPath), { recursive: true })
   writeFileSync(templateAbsPath, templateStub(name))
 
   // Register in config under templates key
-  const configPath = join(projectRoot, '.context-runes', 'config.json')
+  const configPath = join(projectRoot, '.crunes', 'config.json')
   let config = { runes: {} }
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf8')) } catch {}

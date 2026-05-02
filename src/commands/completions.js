@@ -13,7 +13,7 @@ function extractCwd(tokens) {
 
 function loadRuneKeys(dir) {
   try {
-    const configPath = path.join(dir, '.context-runes', 'config.json')
+    const configPath = path.join(dir, '.crunes', 'config.json')
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
     return Object.keys(config.runes ?? {})
   } catch { return [] }
@@ -21,7 +21,7 @@ function loadRuneKeys(dir) {
 
 function loadPluginNames() {
   try {
-    const pluginsPath = path.join(os.homedir(), '.context-runes', 'plugins.json')
+    const pluginsPath = path.join(os.homedir(), '.crunes', 'plugins.json')
     const registry = JSON.parse(fs.readFileSync(pluginsPath, 'utf8'))
     return Object.keys(registry.plugins ?? {})
   } catch { return [] }

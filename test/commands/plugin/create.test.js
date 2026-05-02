@@ -135,8 +135,8 @@ describe('handler (non-interactive)', () => {
     it('creates all 6 expected files', async () => {
       await handler({ ...BASE_OPTS, out, yes: true })
       for (const rel of [
-        '.context-runes-plugin/plugin.json',
-        '.context-runes-plugin/marketplace.json',
+        '.crunes-plugin/plugin.json',
+        '.crunes-plugin/marketplace.json',
         'runes/example.js',
         'templates/example-template.js',
         'README.md',
@@ -148,14 +148,14 @@ describe('handler (non-interactive)', () => {
 
     it('writes valid plugin.json with correct name', async () => {
       await handler({ ...BASE_OPTS, out, yes: true })
-      const pj = JSON.parse(readFileSync(join(out, '.context-runes-plugin', 'plugin.json'), 'utf8'))
+      const pj = JSON.parse(readFileSync(join(out, '.crunes-plugin', 'plugin.json'), 'utf8'))
       expect(pj.name).toBe('my-plugin')
       expect(pj.format).toBe('1')
     })
 
     it('defaults license to MIT when not provided', async () => {
       await handler({ ...BASE_OPTS, license: undefined, out, yes: true })
-      const pj = JSON.parse(readFileSync(join(out, '.context-runes-plugin', 'plugin.json'), 'utf8'))
+      const pj = JSON.parse(readFileSync(join(out, '.crunes-plugin', 'plugin.json'), 'utf8'))
       expect(pj.license).toBe('MIT')
     })
 

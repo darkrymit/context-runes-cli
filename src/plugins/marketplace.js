@@ -100,7 +100,7 @@ async function readLocalMarketplace(resolvedPath) {
   const jsonPath = stat.isDirectory() ? path.join(resolvedPath, 'marketplace.json') : resolvedPath
   const data = JSON.parse(await fs.readFile(jsonPath, 'utf8'))
   const resolvedDir = path.dirname(jsonPath)
-  const resolutionBase = path.basename(resolvedDir) === '.context-runes-plugin'
+  const resolutionBase = path.basename(resolvedDir) === '.crunes-plugin'
     ? path.dirname(resolvedDir)
     : resolvedDir
   return { data, resolvedPath: resolutionBase }

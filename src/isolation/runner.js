@@ -149,7 +149,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     await injectConsole(isolate, context)
 
     if (pluginDir != null) {
-      await context.global.set('CONTEXT_RUNES_PLUGIN_ROOT', pluginDir)
+      await context.global.set('CRUNES_PLUGIN_ROOT', pluginDir)
     }
 
     // Remove $__hostRequire from the global after bootstrap modules are instantiated.

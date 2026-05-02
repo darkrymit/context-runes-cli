@@ -84,7 +84,7 @@ export async function handler({
   }
 
   const outputKey = key ?? templateName
-  runeRelPath = runeRelPath ?? `.context-runes/runes/${outputKey}.js`
+  runeRelPath = runeRelPath ?? `.crunes/runes/${outputKey}.js`
   const runeAbsPath = path.join(projectRoot, runeRelPath)
 
   if (!isNonInteractive) intro('context-runes template use')
@@ -141,7 +141,7 @@ export async function handler({
   }
 
   // Register rune in config
-  const configPath = path.join(projectRoot, '.context-runes', 'config.json')
+  const configPath = path.join(projectRoot, '.crunes', 'config.json')
   let config = { runes: {} }
   try { config = JSON.parse(await fs.readFile(configPath, 'utf8')) } catch {}
 

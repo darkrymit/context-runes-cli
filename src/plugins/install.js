@@ -64,7 +64,7 @@ async function downloadNpm(packageName, destDir) {
  * Install a plugin from source into the global store.
  *
  * @param {string} source      - local path, github:owner/repo, git URL, or npm package
- * @param {string} projectDir  - project root (for updating .context-runes/config.json)
+ * @param {string} projectDir  - project root (for updating .crunes/config.json)
  * @param {{ marketplaceName?: string, pluginName?: string }} provenance
  */
 export async function installPlugin(source, projectDir, provenance = {}) {
@@ -168,7 +168,7 @@ async function updatePlugin(pluginKey, newPluginDir, newPluginJson, projectDir, 
 
 async function addPluginToProjectConfig(projectDir, pluginName) {
   if (!projectDir) return
-  const configPath = path.join(projectDir, '.context-runes', 'config.json')
+  const configPath = path.join(projectDir, '.crunes', 'config.json')
   try {
     const raw = await fs.readFile(configPath, 'utf8')
     const config = JSON.parse(raw)
@@ -204,7 +204,7 @@ export async function uninstallPlugin(pluginKey, projectDir) {
 
 async function removePluginFromProjectConfig(projectDir, pluginName) {
   if (!projectDir) return
-  const configPath = path.join(projectDir, '.context-runes', 'config.json')
+  const configPath = path.join(projectDir, '.crunes', 'config.json')
   try {
     const raw = await fs.readFile(configPath, 'utf8')
     const config = JSON.parse(raw)

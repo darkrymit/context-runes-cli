@@ -16,12 +16,12 @@ export async function handler({ name, projectRoot }) {
 }
 
 async function setProjectPluginEnabled(projectRoot, pluginKey, enabled) {
-  const configPath = path.join(projectRoot, '.context-runes', 'config.json')
+  const configPath = path.join(projectRoot, '.crunes', 'config.json')
   let config
   try {
     config = JSON.parse(await fs.readFile(configPath, 'utf8'))
   } catch (err) {
-    if (err.code === 'ENOENT') throw new Error('No .context-runes/config.json found. Run: crunes init')
+    if (err.code === 'ENOENT') throw new Error('No .crunes/config.json found. Run: crunes init')
     throw err
   }
   const plugins = config.plugins ?? []

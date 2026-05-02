@@ -93,7 +93,7 @@ export function buildProgram() {
 
   program
     .command('init')
-    .description('Create .context-runes/config.json in the current project')
+    .description('Create .crunes/config.json in the current project')
     .action(async () => {
       const { handler } = await import('./commands/init.js')
       await handler({ yes: !!program.opts().yes, projectRoot: projectRoot() })
@@ -103,7 +103,7 @@ export function buildProgram() {
     .command('create [new-rune]')
     .description('Scaffold a new rune and register it in config')
     .addOption(new Option('--format <format>', 'rune output format').choices(['tree', 'markdown']))
-    .option('--path <path>', 'file path for the rune (default: .context-runes/runes/<key>.js)')
+    .option('--path <path>', 'file path for the rune (default: .crunes/runes/<key>.js)')
     .option('--name <name>', 'human-readable label shown in crunes list')
     .option('--description <description>', 'short description of what context this rune provides')
     .action(async (key, opts) => {
@@ -196,7 +196,7 @@ export function buildProgram() {
       '  name        — auto-resolve: project config first, then installed plugins'
     )
     .option('--as <new-rune>', 'register the rune under a different key (default: template name)')
-    .option('--path <path>', 'file path for the rune (default: .context-runes/runes/<key>.js)')
+    .option('--path <path>', 'file path for the rune (default: .crunes/runes/<key>.js)')
     .option('--name <name>', 'human-readable label shown in crunes list')
     .option('--description <description>', 'short description of what context this rune provides')
     .action(async (ref, opts) => {
@@ -207,7 +207,7 @@ export function buildProgram() {
   template
     .command('create [new-template]')
     .description('Scaffold a new template file and register it in config')
-    .option('--path <path>', 'file path for the template (default: .context-runes/templates/<name>.js)')
+    .option('--path <path>', 'file path for the template (default: .crunes/templates/<name>.js)')
     .option('--name <name>', 'display label shown in crunes template list (separate from the template key)')
     .option('--description <description>', 'short description of what kind of rune this template produces')
     .action(async (name, opts) => {

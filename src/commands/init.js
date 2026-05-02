@@ -9,7 +9,7 @@ export async function handler({
   yes = false,
   projectRoot = process.cwd(),
 } = {}) {
-  const configDir = join(projectRoot, '.context-runes');
+  const configDir = join(projectRoot, '.crunes');
   const configPath = join(configDir, 'config.json');
   const isNonInteractive = yes || !process.stdout.isTTY;
 

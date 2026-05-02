@@ -1,7 +1,7 @@
 {
-  "name": "@darkrymit/context-runes",
-  "version": "1.4.3",
-  "description": "CLI tool for querying context-runes enrichers",
+  "name": "@darkrymit/crunes",
+  "version": "0.4.3",
+  "description": "CLI tool for querying crunes enrichers",
   "type": "module",
   "bin": {
     "crunes": "./dist/cli.js"
