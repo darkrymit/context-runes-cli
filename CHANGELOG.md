@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.6] - 2026-05-02
+
+### Changed
+- Renamed npm package from `@darkrymit/crunes` to `@darkrymit/crunes-cli`.
+- Renamed Claude Code plugin from `crunes` to `crunes-aci`.
+
+---
+
 ## [0.4.5] - 2026-05-02
 
 ### Fixed
@@ -24,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.4] - 2026-05-02
 
 ### Changed
-- Migrated package identity from `@darkrymit/context-runes` to `@darkrymit/crunes`.
+- Migrated package identity from `@darkrymit/context-runes` to `@darkrymit/crunes-cli`.
 - Project config folder renamed from `.context-runes/` to `.crunes/`.
 - Plugin manifest folder renamed from `.context-runes-plugin/` to `.crunes-plugin/`.
 - Global store path changed from `~/.context-runes` to `~/.crunes`.

@@ -1,11 +1,11 @@
-# @darkrymit/crunes
+# @darkrymit/crunes-cli
 
 CLI tool for managing and querying crunes. Part of the [crunes](https://github.com/darkrymit/context-runes) ecosystem.
 
 ## Installation
 
 ```bash
-npm install -g @darkrymit/crunes
+npm install -g @darkrymit/crunes-cli
 ```
 
 Requires Node.js ≥ 20.
