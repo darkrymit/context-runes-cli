@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.5] - 2026-05-02
+
+### Changed
+- Migrated package identity from `@darkrymit/context-runes` to `@darkrymit/crunes`.
+- Project config folder renamed from `.context-runes/` to `.crunes/`.
+- Plugin manifest folder renamed from `.context-runes-plugin/` to `.crunes-plugin/`.
+- Global store path changed from `~/.context-runes` to `~/.crunes`.
+- Isolate env variable renamed from `CONTEXT_RUNES_PLUGIN_ROOT` to `CRUNES_PLUGIN_ROOT`.
+- Version history re-baselined from `1.x.x` to `0.x.x`.
+
+---
+
 ## [0.4.3] - 2026-04-21
 
 ### Fixed
