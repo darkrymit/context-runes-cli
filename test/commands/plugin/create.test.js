@@ -153,6 +153,14 @@ describe('handler (non-interactive)', () => {
       expect(pj.format).toBe('1')
     })
 
+    it('generates plugin.json with namespaced permissions schema', async () => {
+      await handler({ ...BASE_OPTS, out, yes: true })
+      const pj = JSON.parse(readFileSync(join(out, '.crunes-plugin', 'plugin.json'), 'utf8'))
+      expect(pj.runes.example.permissions).toEqual({
+        use: { allow: [], deny: [] },
+      })
+    })
+
     it('defaults license to MIT when not provided', async () => {
       await handler({ ...BASE_OPTS, license: undefined, out, yes: true })
       const pj = JSON.parse(readFileSync(join(out, '.crunes-plugin', 'plugin.json'), 'utf8'))

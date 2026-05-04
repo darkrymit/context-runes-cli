@@ -101,7 +101,10 @@ exports[`pluginJson > matches snapshot 1`] = `
       "name": "Example Rune",
       "description": "Replace with your rune description",
       "permissions": {
-        "allow": []
+        "use": {
+          "allow": [],
+          "deny": []
+        }
       }
     }
   },

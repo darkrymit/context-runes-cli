@@ -17,7 +17,12 @@ export function pluginJson({ name, description, author, license }) {
       example: {
         name: 'Example Rune',
         description: 'Replace with your rune description',
-        permissions: { allow: [] },
+        permissions: {
+          use: {
+            allow: [],
+            deny: [],
+          },
+        },
       },
     },
     templates: {
