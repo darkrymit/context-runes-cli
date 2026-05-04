@@ -208,8 +208,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
         const r = await __crunes_target(
           ${JSON.stringify(projectDir)},
           ${JSON.stringify(args)},
-          utils,
-          ${JSON.stringify({ sections })}
+          utils
         );
         return JSON.stringify(r);
       })()`,
