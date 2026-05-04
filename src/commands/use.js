@@ -2,7 +2,9 @@ import { loadConfig, runRune } from '../core.js'
 import { renderSection } from '../utils/render.js'
 import { output, isVerbose } from '../utils/output.js'
 
-function parseKeyToken(token) {
+import micromatch from 'micromatch'
+
+export function parseKeyToken(token) {
   let rest = token
   let sections = null
 
@@ -71,7 +73,7 @@ export async function handler({
     }
 
     const filtered = sectionFilter
-      ? sections.filter(s => sectionFilter.includes(s.name))
+      ? sections.filter(s => micromatch.isMatch(s.name, sectionFilter))
       : sections
 
     allSections.push(...filtered)

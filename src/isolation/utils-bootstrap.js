@@ -15,9 +15,17 @@ globalThis.utils = {
   },
   shell: (cmd, o) => $__utils_shell.apply(undefined, [cmd, o ? JSON.stringify(o) : undefined], { result: { promise: true } })
     .then(r => { try { return JSON.parse(r) } catch { return r } }),
-  section: (name, data, o) => JSON.parse(
-    $__utils_section.applySync(undefined, [name, JSON.stringify(data), o ? JSON.stringify(o) : undefined])
-  ),
+  section: {
+    create: (name, data, o) => JSON.parse(
+      $__utils_section_create.applySync(undefined, [name, JSON.stringify(data), o ? JSON.stringify(o) : undefined])
+    ),
+    match: (sectionName, patterns) =>
+      $__utils_section_match.applySync(undefined, [sectionName, patterns !== undefined ? JSON.stringify(patterns) : undefined]),
+    selected: () => {
+      const s = $__utils_section_selected.applySync(undefined, [])
+      return s ? JSON.parse(s) : null
+    },
+  },
   rune: (key, args) => $__utils_rune
     .apply(undefined, [key, args ? JSON.stringify(args) : undefined], { result: { promise: true } })
     .then(JSON.parse),

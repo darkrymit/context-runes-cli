@@ -39,8 +39,16 @@ async function injectUtils(isolate, context, utils, runeCallback, vars) {
     if (typeof result === 'string') return result
     return JSON.stringify(result)
   }))
-  await jail.set('$__utils_section', new ivm.Reference((name, data, opts) => {
-    return JSON.stringify(utils.section(name, JSON.parse(data), opts ? JSON.parse(opts) : undefined))
+  await jail.set('$__utils_section_create', new ivm.Reference((name, data, opts) => {
+    return JSON.stringify(utils.section.create(name, JSON.parse(data), opts ? JSON.parse(opts) : undefined))
+  }))
+  await jail.set('$__utils_section_match', new ivm.Reference((sectionName, patternsJson) => {
+    const p = patternsJson !== undefined ? JSON.parse(patternsJson) : undefined
+    return utils.section.match(sectionName, p)
+  }))
+  await jail.set('$__utils_section_selected', new ivm.Reference(() => {
+    const s = utils.section.selected()
+    return s ? JSON.stringify(s) : undefined
   }))
   await jail.set('$__utils_rune', new ivm.Reference(async (key, argsJson) => {
     const sections = await runeCallback(key, argsJson ? JSON.parse(argsJson) : [])
@@ -133,7 +141,7 @@ export async function runRuneInIsolate(runeFile, effective, args, projectDir, {
     ? { allow: [...effective.allow, 'fs.read:@plugin/**'], deny: effective.deny }
     : effective
   const checkPermission = makePermissionChecker(augmented)
-  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null, augmented, vars)
+  const utils           = createUtils(projectDir, checkPermission, pluginDir ?? null, augmented, vars, sections)
 
   if (isVerbose) console.error(`[crunes:debug] creating Isolate...`)
   const isolate = new ivm.Isolate({ memoryLimit: isolateMemoryMb })
