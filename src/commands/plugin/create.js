@@ -49,14 +49,22 @@ export function marketplaceJson({ name, description, author }) {
 export function exampleRune() {
   return `// Ready-to-run rune — runs directly from the plugin install location.
 // Users activate it by adding your plugin to their project config.
+//
+// permissions (plugin.json):
+//   use:
+//     allow: []  — add patterns like fs.read:./** if you use utils.fs
+//     deny:  []
 
-export async function generate(dir, args, utils, opts) {
-  // dir            — absolute path to the user's project root
-  // args           — string[] passed via $example(arg1, arg2)
-  // utils          — { md, tree, section, fs, json, shell, rune }
-  // opts.sections  — string[] | null — requested sections (performance hint)
+export async function use(dir, args, utils) {
+  // dir   — absolute path to the user's project root
+  // args  — string[] passed via $example=arg1,arg2
+  // utils — { md, tree, section, fs, json, shell, fetch, env, vars, rune }
+  //
+  // utils.section.selected()         → string[] | null — requested section patterns
+  // utils.section.match(name)        → bool            — true if section is requested
+  // utils.section.create(name, data) → Section         — build a section object
 
-  return utils.section('example', {
+  return utils.section.create('example', {
     type: 'markdown',
     content: utils.md.h3('Example') + '\\n' + utils.md.ul(['Replace with real output']),
   });
@@ -67,9 +75,22 @@ export async function generate(dir, args, utils, opts) {
 export function exampleTemplate() {
   return `// Template rune — copied into the user's project by \`crunes template use\`.
 // Edit this file to define what a new rune looks like when scaffolded from your plugin.
+//
+// permissions (plugin.json):
+//   use:
+//     allow: []  — add patterns like fs.read:./** if you use utils.fs
+//     deny:  []
 
-export async function generate(dir, args, utils, opts) {
-  return utils.section('example', {
+export async function use(dir, args, utils) {
+  // dir   — absolute path to the user's project root
+  // args  — string[] passed via $key=arg1,arg2
+  // utils — { md, tree, section, fs, json, shell, fetch, env, vars, rune }
+  //
+  // utils.section.selected()         → string[] | null — requested section patterns
+  // utils.section.match(name)        → bool            — true if section is requested
+  // utils.section.create(name, data) → Section         — build a section object
+
+  return utils.section.create('example', {
     type: 'markdown',
     content: utils.md.h3('Example') + '\\n' + utils.md.ul(['Replace with real output']),
   });
