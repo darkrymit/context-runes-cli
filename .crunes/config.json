@@ -5,16 +5,18 @@
       "name": "Release Info",
       "description": "Current version, branch/tag status, recent commits, changelog, and release process",
       "permissions": {
-        "allow": [
-          "fs.read:package.json",
-          "fs.read:package-lock.json",
-          "fs.read:src/program.js",
-          "fs.read:CHANGELOG.md",
-          "shell:git log *",
-          "shell:git rev-parse *",
-          "shell:git describe *",
-          "shell:git rev-list *"
-        ]
+        "use": {
+          "allow": [
+            "fs.read:package.json",
+            "fs.read:package-lock.json",
+            "fs.read:src/program.js",
+            "fs.read:CHANGELOG.md",
+            "shell:git log *",
+            "shell:git rev-parse *",
+            "shell:git describe *",
+            "shell:git rev-list *"
+          ]
+        }
       }
     },
     "m": {
@@ -23,7 +25,7 @@
       "description": "Live structural context (README and file tree) for modules.",
       "permissions": {
         "use": {
-          "allow": ["fs.read:src/**", "fs.glob:src/**"]
+          "allow": ["fs.read:src/**", "fs.glob:src/**", "fs.exists:src/**"]
         }
       }
     },
@@ -33,7 +35,11 @@
       "description": "Deep narrative context (Key Decisions, Gotchas) from the docs/knowledge-base.",
       "permissions": {
         "use": {
-          "allow": ["fs.read:docs/knowledge-base/**"]
+          "allow": [
+            "fs.read:docs/knowledge-base/**",
+            "fs.glob:docs/knowledge-base/**",
+            "fs.exists:docs/knowledge-base/**"
+          ]
         }
       }
     }
