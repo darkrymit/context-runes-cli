@@ -4,9 +4,8 @@
 
 Before brainstorming, planning, or touching any code:
 
-1. **Get live release context** — run `crunes use release` to confirm the current version, branch/tag state, and recent commits. Re-run at any point if you need to verify sync state before tagging.
-2. **Read the source** — locate the relevant files under `src/` before writing anything. Prefer targeted reads over broad glob/grep sweeps.
-3. **Then brainstorm, plan, and code** — in that order.
+1. **Get live codebase context via context runes** — scope `m` to the modules relevant to the task and `kb` to matching entries; avoid loading all modules unless the task spans the full codebase. Re-run crunes at any point if exploration reveals additional dependencies.
+2. **Then brainstorm, plan, and code** — in that order.
 
 ## Restrictions
 
@@ -17,7 +16,9 @@ Before brainstorming, planning, or touching any code:
 - **Rune files are ESM** — all files under `.crunes/runes/` and `src/` use `import`/`export`. Never use `require()`.
 - **Local runes run inside `isolated-vm`** — they cannot access Node builtins directly. All I/O goes through `utils.fs`, `utils.shell`, `utils.json`, `utils.fetch`, and `utils.env`.
 - **Test before committing rune changes** — run `node dist/cli.js use <rune> --plain` to verify output before staging.
-- **Prefer targeted reads** — only read files that will change what you implement. Ask "will this affect my approach?" before opening anything.
+- **Fetch module context via `crunes use m=<module>`** for the module(s) you are about to touch — fall back to the module's `README.md` only if `crunes` is unavailable.
+- **Prefer `crunes` over `Glob`/`Grep`/`ls`** — use filesystem tools only when crunes cannot answer the question.
+- **Only read files that will change what you implement** — ask "will this result change my approach?" before reading anything.
 
 ## Build & Development Commands
 
@@ -49,9 +50,9 @@ npm test && npm run build && node dist/cli.js --help
 
 **Stack**: Node.js ≥ 20 • ESM • esbuild (bundler) • commander (CLI) • isolated-vm (plugin sandboxing) • vitest (tests)
 
-**Entry point**: `src/cli.js` — registers all commands via commander, applies global flags (`--plain`, `--verbose`, `--yes`, `--cwd`).
+**Entry point**: `src/cli/cli.js` — process bootstrap, Node snapshot workarounds, and `-v` flag disambiguation.
 
-**Core execution path**: `crunes use <key>` → `src/commands/use.js` → `src/core.js` (`runRune`) → resolves local vs. plugin → `src/isolation/runner.js` (isolated-vm) → returns `Section[]` → `src/utils/render.js` → stdout.
+**Core execution path**: `crunes use <key>` → `src/rune/commands/use.js` → `src/rune/resolver.js` (`runRune`) → resolves local vs. plugin → `src/rune/isolation/runner.js` (isolated-vm) → returns `Section[]` → `src/shared/render.js` → stdout.
 
 **Key resolution order** (for a bare key with no prefix):
 1. Project config (`.crunes/config.json` → `runes.<key>.path`)
@@ -59,49 +60,38 @@ npm test && npm run build && node dist/cli.js --help
 
 **Prefixes**: `local:<key>` forces project config only. `<plugin>:<key>` forces a specific plugin.
 
-### Source Map
+### Module Map
 
-```
-src/
-  cli.js                  Entry point, all command registrations
-  core.js                 runRune() — key resolution, circular detection, orchestration
-  api/utils/
-    index.js              createUtils() — assembles the full utils object injected into runes
-    fs.js                 Sandboxed filesystem access (read/exists/glob)
-    shell.js              Permission-gated shell execution + ShellError
-    json.js               JSON file queries with JSONPath + JsonParseError
-    md.js                 Markdown string builders (h1-h3, bold, ul, ol, table, ...)
-    tree.js               Tree node builders and formatters (tree/list styles)
-    fetch.js              Permission-gated HTTP client (mirrors Web Fetch API) + FetchError
-    env.js                Permission-gated env var access (process.env + .env files) via dotenv + micromatch
-    vars.js               Static key/value vars injected per-rune from config
-  isolation/
-    runner.js             runRuneInIsolate / executePluginRune — isolated-vm lifecycle
-    resolver.js           ESM module resolution inside the isolate
-    permissions.js        computeEffectivePermissions + makePermissionChecker
-    permissions-http.js   fetch: permission pattern parsing and matching
-    permissions-env.js    env: permission pattern parsing (source + key glob)
-    utils-bootstrap.js    In-isolate utils stub (communicates back to host)
-    console-bootstrap.js  In-isolate console shim
-    builtins.js           Built-in polyfills injected into every isolate
-  plugins/
-    manifest.js           loadPluginJson + validatePluginJson
-    registry.js           loadRegistry / resolvePluginKey
-    install.js            crunes plugin install — fetch, validate, consent, npm install
-    marketplace.js        Marketplace source management + search
-    deps.js               Plugin npm dependency resolution
-    consent.js            Permission grant prompt
-    store.js              Plugin store path helpers (~/.crunes/plugins/<key>)
-  commands/               One file per CLI command or subcommand group
-  utils/
-    render.js             render(data) + renderSection(section) → CLI output string
-```
+Prefer `crunes use m` — this is a static fallback only.
+
+- `cli` — Entry point (`cli.js`), Commander setup (`program.js`), `-v` disambiguation, general CLI commands.
+- `core` — `loadConfig()`, `CircularRuneError`, shared config types.
+- `marketplace` — Marketplace source URL management, plugin index browsing and caching.
+- `plugin` — Plugin registry, install, consent, dep resolution, store paths.
+- `rune` — Key resolution, sandboxed VM execution, utils API, permissions.
+- `shared` — `render.js`, `output.js` — cross-cutting utilities with no domain coupling.
+- `template` — Rune template listing and scaffolding.
+
+### Module Documentation
+
+Every module has a `README.md` stub at `src/<module>/README.md` (file index, submodules, related modules). **Do not put narrative docs in READMEs** — narrative belongs in the KB.
+
+KB vault: `docs/knowledge-base/` — module notes at `modules/<module>.md`, flows at `flows/<flow>.md`, system at `system/`.
+
+- **Single module:** `crunes use m=<module> -a kb=m,<module>`
+- **Submodule:** `crunes use m=<module>.<submodule>` (dot = submodule path separator, e.g. `m=rune.isolation`)
+- **Multiple modules:** `crunes use m=<mod1>,<mod2> -a kb=m,<mod1>,<mod2>`
+- **Priority order:** chain `-a` groups so the most task-relevant module comes first — e.g. `crunes use m=rune.isolation -a kb=m,rune.isolation -a m=plugin -a kb=m,plugin`
+
+Include `kb` alongside `m` when design decisions or subtle gotchas are likely to matter — new features, cross-module contracts, anything non-obvious from source. Skip for purely structural reads.
 
 ### Context Runes
 
-- `release`: Current version, lockfile sync status, branch/tag, last 10 commits, recent changelog, release process steps.
+- `release` — Current version, lockfile sync status, branch/tag, last 10 commits, recent changelog, release process steps.
+- `m` — Module structure tree + file tree. No args: all modules. `m=rune` → rune module. `m=rune.isolation` → submodule (dot = path separator). `m=plugin,rune` → multiple modules. Sections: `layout` (submodule tree), `files` (JS file tree), `readme`.
+- `kb` — Knowledge base notes. No args: index of all entries. `kb=m,rune,plugin` → specific module entries. `kb=f,use` → flow doc. Sections: one per entry name.
 
-More runes will be added here as per-module READMEs are written.
+**Fallback** (crunes unavailable): Module Map above for `m`; `docs/knowledge-base/index.md` for `kb`.
 
 ## Release Process
 
@@ -112,7 +102,7 @@ More runes will be added here as per-module READMEs are written.
 5. Tag: `git tag vX.Y.Z`
 6. Push: `git push origin main --tags` — publish CI fires automatically on the tag
 
-Verify before pushing: `crunes use release --plain` should show matching versions, `✓` on lockfile, and `0 (in sync)` on unpushed.
+Verify before pushing: `node dist/cli.js use release --plain` should show matching versions, `✓` on lockfile, and `0 (in sync)` on unpushed.
 
 ## Testing Philosophy
 
