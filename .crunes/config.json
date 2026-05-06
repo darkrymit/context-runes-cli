@@ -16,6 +16,26 @@
           "shell:git rev-list *"
         ]
       }
+    },
+    "m": {
+      "path": ".crunes/runes/m.js",
+      "name": "Module Structural Context",
+      "description": "Live structural context (README and file tree) for modules.",
+      "permissions": {
+        "use": {
+          "allow": ["fs.read:src/**", "fs.glob:src/**"]
+        }
+      }
+    },
+    "kb": {
+      "path": ".crunes/runes/kb.js",
+      "name": "Knowledge Base Context",
+      "description": "Deep narrative context (Key Decisions, Gotchas) from the docs/knowledge-base.",
+      "permissions": {
+        "use": {
+          "allow": ["fs.read:docs/knowledge-base/**"]
+        }
+      }
     }
   }
 }
